@@ -7,3 +7,5 @@ spec:
   params:
   - name: url
     value: image-registry.openshift-image-registry.svc:5000/stock-trader/trader
+  - name: tag
+    value: tekton

@@ -6,8 +6,8 @@ spec:
   resources:
   - name: trader-git
     type: git
-  #- name: trader-image
-  #  type: image
+  - name: trader-image
+    type: image
   tasks:
   - name: build
     taskRef:
@@ -16,17 +16,17 @@ spec:
       inputs:
         - name: source
           resource: trader-git
+      outputs:
+      - name: image
+        resource: trader-image
     params:
-      - name: extract_certificate
+      - name: EXTRACT_CERTIFICATE
         value: "true"
-      - name: certificate_extract_endpoint
+      - name: CERTIFICATE_EXTRACT_ENDPOINT
         value: "keycloak-stock-trader.ceh-smaug-a01ee4194ed985a1e32b1d96fd4ae346-0000.us-south.containers.appdomain.cloud:443"
-      - name: goals
+      - name: GOALS
         value:
           - "package"
-    #  outputs:
-    #  - name: image
-    #    resource: trader-image
   #- name: deploy
   #  taskRef:
   #    name: openshift-client

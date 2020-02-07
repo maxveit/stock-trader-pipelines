@@ -26,6 +26,10 @@ spec:
     resources:
     - name: source
       type: git
+  outputs:
+    resources:
+      - name: image
+        type: image
   steps:
   - name: maven-build
     image: maven:3.6-jdk-11-slim
@@ -44,7 +48,6 @@ spec:
           openssl s_client -showcerts -connect $(inputs.params.CERTIFICATE_EXTRACT_ENDPOINT) </dev/null 2>/dev/null|openssl x509 -outform PEM > certificate.pem;
         fi;
         ls -la /workspace;
-        ls -la ~;
   - name: container-build-and-push
     workingdir: /workspace/source
     image: gcr.io/kaniko-project/executor:v0.13.0
@@ -53,11 +56,13 @@ spec:
     env:
     - name: DOCKER_CONFIG
       value: /tekton/home/.docker
-    script: |
-     /kaniko/executor
-      --dockerfile=$(inputs.params.DOCKERFILE)
-      --context=/workspace/source/$(inputs.params.CONTEXT)  # The user does not need to care the workspace and the source.
-      --destination=$(outputs.resources.image.url);
+    command:
+    - /kaniko/executor
+    #- $(inputs.params.EXTRA_ARGS)
+    - --skip-tls-verify
+    - --dockerfile=$(inputs.params.DOCKERFILE)
+    - --context=/workspace/source/$(inputs.params.CONTEXT)  # The user does not need to care the workspace and the source.
+    - --destination=$(outputs.resources.image.url):$(outputs.resources.image.tag)
     securityContext:
       runAsUser: 0
   volumes:
