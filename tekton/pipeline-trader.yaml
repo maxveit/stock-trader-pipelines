@@ -1,0 +1,37 @@
+apiVersion: tekton.dev/v1alpha1
+kind: Pipeline
+metadata:
+  name: trader-build-deploy
+spec:
+  resources:
+  - name: trader-git
+    type: git
+  #- name: trader-image
+  #  type: image
+  tasks:
+  - name: build
+    taskRef:
+      name: app-build
+    resources:
+      inputs:
+        - name: source
+          resource: trader-git
+    params:
+      - name: extract_certificate
+        value: "true"
+      - name: certificate_extract_endpoint
+        value: "keycloak-stock-trader.ceh-smaug-a01ee4194ed985a1e32b1d96fd4ae346-0000.us-south.containers.appdomain.cloud:443"
+      - name: goals
+        value:
+          - "package"
+    #  outputs:
+    #  - name: image
+    #    resource: trader-image
+  #- name: deploy
+  #  taskRef:
+  #    name: openshift-client
+  #  runAfter:
+  #    - build
+  #  params:
+  #  - name: ARGS
+  #    value: "rollout latest trader"

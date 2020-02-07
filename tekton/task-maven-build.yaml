@@ -1,0 +1,65 @@
+apiVersion: tekton.dev/v1alpha1
+kind: Task
+metadata:
+  name: app-build
+spec:
+  inputs:
+    params:
+    - name: GOALS
+      description: The Maven goals to run
+      type: array
+      default:
+        - "package"
+    - name: EXTRACT_CERTIFICATE
+      description: If true, extract certificate from given endpoint
+      type: string
+      default: "false"
+    - name: CERTIFICATE_EXTRACT_ENDPOINT
+      description: Endpoint that is queried for the certificate if 'extract_certificate=true'
+      type: string
+    - name: DOCKERFILE
+      description: Path to the Dockerfile to build.
+      default: ./Dockerfile
+    - name: CONTEXT
+      description: The build context used by Kaniko.
+      default: ./
+    resources:
+    - name: source
+      type: git
+  steps:
+  - name: maven-build
+    image: maven:3.6-jdk-11-slim
+    script: |
+        ls -la /workspace/source;
+        /usr/bin/mvn -f /workspace/source/pom.xml package;
+        ls -la /workspace/source/target;
+    volumeMounts:
+      - name: m2-repository
+        mountPath: /.m2
+  - name: certificate-extract
+    image: alpine:latest
+    script: |
+        if [ "$(inputs.params.EXTRACT_CERTIFICATE)" = "true" ]; then
+          apk add openssl
+          openssl s_client -showcerts -connect $(inputs.params.CERTIFICATE_EXTRACT_ENDPOINT) </dev/null 2>/dev/null|openssl x509 -outform PEM > certificate.pem;
+        fi;
+        ls -la /workspace;
+        ls -la ~;
+  - name: container-build-and-push
+    workingdir: /workspace/source
+    image: gcr.io/kaniko-project/executor:v0.13.0
+    # specifying DOCKER_CONFIG is required to allow kaniko to detect docker credential
+    # https://github.com/tektoncd/pipeline/pull/706
+    env:
+    - name: DOCKER_CONFIG
+      value: /tekton/home/.docker
+    script: |
+     /kaniko/executor
+      --dockerfile=$(inputs.params.DOCKERFILE)
+      --context=/workspace/source/$(inputs.params.CONTEXT)  # The user does not need to care the workspace and the source.
+      --destination=$(outputs.resources.image.url);
+    securityContext:
+      runAsUser: 0
+  volumes:
+    - name: m2-repository
+      emptyDir: {}
