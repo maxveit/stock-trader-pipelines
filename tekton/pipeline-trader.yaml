@@ -17,7 +17,7 @@ spec:
         - name: source
           resource: trader-git
       outputs:
-      - name: image
+      - name: builtImage
         resource: trader-image
     params:
       - name: EXTRACT_CERTIFICATE

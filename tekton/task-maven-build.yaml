@@ -28,7 +28,7 @@ spec:
       type: git
   outputs:
     resources:
-      - name: image
+      - name: builtImage
         type: image
   steps:
   - name: maven-build
@@ -62,9 +62,15 @@ spec:
     - --skip-tls-verify
     - --dockerfile=$(inputs.params.DOCKERFILE)
     - --context=/workspace/source/$(inputs.params.CONTEXT)  # The user does not need to care the workspace and the source.
-    - --destination=$(outputs.resources.image.url):$(outputs.resources.image.tag)
+    - --destination=$(outputs.resources.builtImage.url)
     securityContext:
       runAsUser: 0
+  - name: debug
+    image: alpine:latest
+    script: |
+        ls -la /workspace;
+        ls -la /workspace/output;
+        ls -la /workspace/output/builtImage;
   volumes:
     - name: m2-repository
       emptyDir: {}

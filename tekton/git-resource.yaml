@@ -8,4 +8,4 @@ spec:
   - name: url
     value: https://github.com/maxveit/trader
   - name: revision
-    value: tekton
+    value: tekton2
