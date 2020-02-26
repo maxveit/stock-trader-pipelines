@@ -31,7 +31,7 @@ spec:
         - name: source
           resource: flyway-git
       outputs:
-        - name: image
+        - name: builtImage
           resource: flyway-image
     params:
       - name: CONTEXT

@@ -43,5 +43,5 @@ spec:
         type: git
   steps:
   - name: flyway
-    image: flyway/flyway:6.2.4
-#    args: ["$(inputs.params.ARGS)", "-url=$(input.params.URL)", "-user=$(input.params.USER)", "-password=$(input.params.PASSWORD)", "-sqlFiles=$(input.params.SQLDIR)"]
+    image: image-registry.openshift-image-registry.svc:5000/stock-trader/flyway
+    args: ["$(inputs.params.ARGS)", "-url=$(input.params.URL)", "-user=$(input.params.USER)", "-password=$(input.params.PASSWORD)", "-sqlFiles=$(input.params.SQLDIR)"]
