@@ -45,6 +45,7 @@ spec:
   - name: flyway
     image: image-registry.openshift-image-registry.svc:5000/stock-trader/flyway
     script: |
+        whoami
         ls -la /flyway/sql
         ls -la $(inputs.params.SQLDIR)
         cp $(inputs.params.SQLDIR)* /flyway/sql/
