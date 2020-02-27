@@ -38,4 +38,4 @@ spec:
       - name: PASSWORD
         value: "postgres"
       - name: SQLDIR
-        value: ""
+        value: "/workspace/source/src/main/resources/db/migration/"

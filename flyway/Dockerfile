@@ -15,6 +15,7 @@
 FROM flyway/flyway:latest-alpine
 
 RUN chmod +x /flyway/flyway && ls -la /flyway/
+USER flyway
 
 ENTRYPOINT ["/flyway/flyway"]
 CMD ["-?"]

@@ -44,4 +44,8 @@ spec:
   steps:
   - name: flyway
     image: image-registry.openshift-image-registry.svc:5000/stock-trader/flyway
-    args: ["$(inputs.params.ARGS)", "-url=$(input.params.URL)", "-user=$(input.params.USER)", "-password=$(input.params.PASSWORD)", "-sqlFiles=$(input.params.SQLDIR)"]
+    script: |
+        ls -la /flyway/sql
+        ls -la $(inputs.params.SQLDIR)
+        cp $(inputs.params.SQLDIR)* /flyway/sql/
+        /flyway/flyway $(inputs.params.ARGS) -url=$(inputs.params.URL) -user=$(inputs.params.USER) -password=$(inputs.params.PASSWORD)
