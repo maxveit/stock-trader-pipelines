@@ -1,0 +1,11 @@
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineRun
+metadata:
+  name: flyway-pipelinerun-001
+spec:
+  pipelineRef:
+    name: flyway-container-build
+  workspaces:
+  - name: pipeline-workspace
+    persistentVolumeClaim:
+      claimName: workspace-pvc

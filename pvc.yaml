@@ -12,12 +12,18 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-apiVersion: tekton.dev/v1alpha1
-kind: PipelineResource
+apiVersion: v1
+kind: PersistentVolumeClaim
 metadata:
-  name: flyway-image
+ name: workspace-pvc
+ labels:
+   billingType: hourly
+   region: # Example: us-south
+   zone: # Example: dal13
 spec:
-  type: image
-  params:
-  - name: url
-    value: image-registry.openshift-image-registry.svc:5000/stock-trader/flyway
+ accessModes:
+   - ReadWriteMany
+ resources:
+   requests:
+     storage: 1Gi
+ storageClassName: ibmc-file-gold

@@ -13,27 +13,19 @@
 #   limitations under the License.
 
 apiVersion: tekton.dev/v1alpha1
-kind: Pipeline
+kind: Task
 metadata:
-  name: flyway-container-build
+  name: cleanup-folder
 spec:
   workspaces:
-    name: shared
-  tasks:
-  - name: fetch-repository
-    taskRef:
-      name: git-clone
-    workspaces:
-    - name: output
-      workspace: shared
+  - name: workspace
+    description: The workspace to be cleaned up
+  inputs:
     params:
-    - name: url
-      value: https://github.com/maxveit/stock-trader-pipelines.git
-    - name: revision
-      value: master
-  - name: flyway-container-build
-    taskRef:
-      name: container-build-push
-    params:
-      - name: CONTEXT
-        value: "flyway/"
+    - name: PATH
+      description: To be cleaned up path using rm -rf
+  steps:
+  - name: cleanup-folder
+    image: alpine:latest
+    script: |
+      rm -rf $(inputs.params.PATH)
