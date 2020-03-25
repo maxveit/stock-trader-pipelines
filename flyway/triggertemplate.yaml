@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1alpha1
 kind: TriggerTemplate
 metadata:
-  name: flyway-template
+  name: flyway-container-build
 spec:
   params:
   - name: gitRevision
