@@ -14,7 +14,7 @@ spec:
             eventTypes:
               - push
               - ping
-      #bindings:
-      #  - name: pipeline-binding-asdf
+      bindings:
+        - name: github-binding
       template:
         name: flyway-container-build

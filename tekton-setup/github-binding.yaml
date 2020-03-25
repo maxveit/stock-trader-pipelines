@@ -1,0 +1,12 @@
+apiVersion: tekton.dev/v1alpha1
+kind: TriggerBinding
+metadata:
+  name: github-binding
+spec:
+  params:
+  - name: gitRevision
+    value: $(body.head_commit.id)
+  - name: gitUrl
+    value: $(body.repository.url)
+  - name: contentType
+    value: $(header.content-Type)
