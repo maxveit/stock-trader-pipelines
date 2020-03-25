@@ -17,6 +17,9 @@ kind: Task
 metadata:
   name: container-build-push
 spec:
+  workspaces:
+  - name: source
+    description: The workspace containing the source Dockerfile
   inputs:
     params:
     - name: DOCKERFILE
@@ -25,16 +28,18 @@ spec:
     - name: CONTEXT
       description: The build context used by Kaniko.
       default: ./
-    resources:
-    - name: source
-      type: git
-  outputs:
-    resources:
-      - name: builtImage
-        type: image
+    - name: BUILT_IMAGE
+      description: The destination tag to store the image
+#    resources:
+#    - name: source
+#      type: git
+#  outputs:
+#    resources:
+#      - name: builtImage
+#        type: image
   steps:
   - name: container-build-push
-    workingdir: /workspace/source
+    workingdir: "$(workspaces.source.path)/src"
     image: gcr.io/kaniko-project/executor:v0.13.0
     # specifying DOCKER_CONFIG is required to allow kaniko to detect docker credential
     # https://github.com/tektoncd/pipeline/pull/706
@@ -46,7 +51,7 @@ spec:
     #- $(inputs.params.EXTRA_ARGS)
     - --skip-tls-verify
     - --dockerfile=$(inputs.params.DOCKERFILE)
-    - --context=/workspace/source/$(inputs.params.CONTEXT)  # The user does not need to care the workspace and the source.
-    - --destination=$(outputs.resources.builtImage.url)
+    - --context="$(workspaces.source.path)/src/$(inputs.params.CONTEXT)"  # The user does not need to care the workspace and the source.
+    - --destination=$(inputs.params.BUILT_IMAGE)
     securityContext:
       runAsUser: 0

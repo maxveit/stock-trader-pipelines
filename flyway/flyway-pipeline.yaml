@@ -17,22 +17,23 @@ kind: Pipeline
 metadata:
   name: flyway-container-build
 spec:
-  resources:
-  - name: flyway-git
-    type: git
-  - name: flyway-image
-    type: image
+  workspaces:
+    name: shared
   tasks:
+  - name: fetch-repository
+    taskRef:
+      name: git-clone
+    workspaces:
+    - name: output
+      workspace: shared
+    params:
+    - name: url
+      value: https://github.com/maxveit/stock-trader-pipelines.git
+    - name: revision
+      value: master
   - name: flyway-container-build
     taskRef:
       name: container-build-push
-    resources:
-      inputs:
-        - name: source
-          resource: flyway-git
-      outputs:
-        - name: builtImage
-          resource: flyway-image
     params:
       - name: CONTEXT
         value: "flyway/"
