@@ -1,0 +1,33 @@
+apiVersion: tekton.dev/v1alpha1
+kind: TriggerTemplate
+metadata:
+  name: flyway-template
+spec:
+  params:
+  - name: gitRevision
+    description: The git revision
+    default: master
+  - name: gitUrl
+    description: The git repository url
+    default: https://github.com/maxveit/stock-trader-pipelines.git
+  - name: imageUrl
+    default: image-registry.openshift-image-registry.svc:5000/tekton/flyway
+  resourcetemplates:
+  - apiVersion: tekton.dev/v1alpha1
+    kind: PipelineRun
+    metadata:
+      generateName: flyway-pipelinerun-
+    spec:
+      pipelineRef:
+        name: flyway-container-build
+      params:
+      - name: buildUid
+        value: $(uid)
+      - name: gitRevision
+        value: $(gitRevision)
+      - name: gitUrl
+        value: $(gitUrl)
+      workspaces:
+      - name: pipeline-workspace
+      persistentVolumeClaim:
+        claimName: workspace-pvc

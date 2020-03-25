@@ -1,0 +1,19 @@
+apiVersion: tekton.dev/v1alpha1
+kind: EventListener
+metadata:
+  name: github-listener-flyway
+spec:
+  #serviceAccountName: tekton-triggers-example-sa
+  triggers:
+    - name: gh-trigger
+      interceptors:
+        - github:
+            #secretRef:
+            #  secretName: foo
+            #  secretKey: bar
+            eventTypes:
+              - push
+      #bindings:
+      #  - name: pipeline-binding
+      template:
+        name: flyway-container-build

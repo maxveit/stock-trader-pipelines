@@ -23,6 +23,9 @@ spec:
   - name: set-directories
     taskRef:
       name: set-directories
+    params:
+    - name: buildUid
+      value: $(buildUid)
     workspaces:
     - name: pipeline
       workspace: pipeline-workspace
@@ -34,9 +37,9 @@ spec:
       workspace: pipeline-workspace
     params:
     - name: url
-      value: https://github.com/maxveit/stock-trader-pipelines.git
+      value: $(gitUrl)
     - name: revision
-      value: master
+      value: $(gitRevision)
     - name: deleteExisting
       value: "true"
   - name: flyway-container-build
@@ -51,5 +54,5 @@ spec:
       - name: context
         value: "flyway/"
       - name: imageUrl
-        value: image-registry.openshift-image-registry.svc:5000/tekton/flyway
+        value: $(imageUrl)
       
