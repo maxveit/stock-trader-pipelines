@@ -3,9 +3,6 @@ kind: Task
 metadata:
   name: git-clone
 spec:
-  workspaces:
-  - name: source
-    description: The git repo will be cloned onto the volume backing this workspace
   inputs:
     params:
     - name: url
@@ -19,10 +16,12 @@ spec:
       description: defines if http.sslVerify should be set to true or false in the global git config
       type: string
       default: "true"
-    - name: deleteExisting
-      description: clean out the contents of the repo's destination directory (if it already exists) before trying to clone the repo there
+    - name: sourceDir
+      description: defines the directory where the source should be checked out to
       type: string
-      default: "false"
+  workspaces:
+  - name: source
+    description: The git repo will be cloned onto the volume backing this workspace
   results:
   - name: commit
     description: The precise commit SHA that was fetched by this Task
@@ -30,26 +29,7 @@ spec:
   - name: clone
     image: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:latest
     script: |
-      CHECKOUT_DIR="$(workspaces.source.path)/"
-
-      cleandir() {
-        # Delete any existing contents of the repo directory if it exists.
-        #
-        # We don't just "rm -rf $CHECKOUT_DIR" because $CHECKOUT_DIR might be "/"
-        # or the root of a mounted volume.
-        if [[ -d "$CHECKOUT_DIR" ]] ; then
-          # Delete non-hidden files and directories
-          rm -rf "$CHECKOUT_DIR"/*
-          # Delete files and directories starting with . but excluding ..
-          rm -rf "$CHECKOUT_DIR"/.[!.]*
-          # Delete files and directories starting with .. plus any other character
-          rm -rf "$CHECKOUT_DIR"/..?*
-        fi
-      }
-
-      if [[ "$(inputs.params.deleteExisting)" == "true" ]] ; then
-        cleandir
-      fi
+      CHECKOUT_DIR="$(inputs.params.sourceDir)/"
 
       /ko-app/git-init \
         -url "$(inputs.params.url)" \
@@ -63,6 +43,8 @@ spec:
       then
         exit $EXIT_CODE
       fi
+
+      ls -la $CHECKOUT_DIR
       # Make sure we don't add a trailing newline to the result!
       echo -n "$RESULT_SHA" > /tekton/results/commit
     securityContext:

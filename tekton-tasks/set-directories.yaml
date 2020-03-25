@@ -17,6 +17,11 @@ kind: Task
 metadata:
   name: set-directories
 spec:
+  inputs:
+    params:
+    - name: uid
+      type: string
+      description: Unique build Uid
   workspaces:
   - name: pipeline
   results:
@@ -28,12 +33,12 @@ spec:
   - name: set-directories
     image: alpine:latest
     script: |
-      mkdir "$(workspaces.pipeline.path)/$(uid)"
-      mkdir "$(workspaces.pipeline.path)/$(uid)/source"
-      mkdir "$(workspaces.pipeline.path)/$(uid)/artefacts"
-      echo -n "$(workspaces.pipeline.path)/$(uid)/source" > /tekton/results/sourceDir
-      echo -n "$(workspaces.pipeline.path)/$(uid)/artefacts" > /tekton/results/artefactDir
+      mkdir "$(workspaces.pipeline.path)/$(inputs.params.uid)"
+      mkdir "$(workspaces.pipeline.path)/$(inputs.params.uid)/source"
+      mkdir "$(workspaces.pipeline.path)/$(inputs.params.uid)/artefacts"
+      echo -n "$(workspaces.pipeline.path)/$(inputs.params.uid)/source" > /tekton/results/sourceDir
+      echo -n "$(workspaces.pipeline.path)/$(inputs.params.uid)/artefacts" > /tekton/results/artefactDir
       ls -la "$(workspaces.pipeline.path)/"
-      ls -la "$(workspaces.pipeline.path)/$(uid)/"
+      ls -la "$(workspaces.pipeline.path)/$(inputs.params.uid)/"
     securityContext:
       runAsUser: 0

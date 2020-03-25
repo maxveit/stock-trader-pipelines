@@ -17,6 +17,10 @@ kind: Pipeline
 metadata:
   name: flyway-container-build
 spec:
+  params:
+  - name: buildUid
+  - name: gitRevision
+  - name: gitUrl
   workspaces:
   - name: pipeline-workspace
   tasks:
@@ -24,12 +28,14 @@ spec:
     taskRef:
       name: set-directories
     params:
-    - name: buildUid
-      value: $(buildUid)
+    - name: uid
+      value: $(params.buildUid)
     workspaces:
     - name: pipeline
       workspace: pipeline-workspace
   - name: fetch-repository
+    runAfter:
+      - set-directories
     taskRef:
       name: git-clone
     workspaces:
@@ -37,11 +43,11 @@ spec:
       workspace: pipeline-workspace
     params:
     - name: url
-      value: $(gitUrl)
+      value: $(params.gitUrl)
     - name: revision
-      value: $(gitRevision)
-    - name: deleteExisting
-      value: "true"
+      value: $(params.gitRevision)
+    - name: sourceDir
+      value: $(tasks.set-directories.results.sourceDir)
   - name: flyway-container-build
     runAfter:
       - fetch-repository
