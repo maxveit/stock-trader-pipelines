@@ -12,6 +12,9 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+# remarks
+# # CHECKOUT_DIR="$(inputs.params.sourceDir)/"
+
 apiVersion: tekton.dev/v1alpha1
 kind: Task
 metadata:
@@ -22,6 +25,20 @@ spec:
     - name: uid
       type: string
       description: Unique build Uid
+    - name: url
+      description: git url to clone
+      type: string
+    - name: revision
+      description: git revision to checkout (branch, tag, sha, ref…)
+      type: string
+      default: master
+    - name: sslVerify
+      description: defines if http.sslVerify should be set to true or false in the global git config
+      type: string
+      default: "true"
+    - name: sourceDir
+      description: defines the directory where the source should be checked out to
+      type: string
   workspaces:
   - name: pipeline
   results:
@@ -31,8 +48,10 @@ spec:
     description: The directory containing the build artefacts
   - name: imageUrl
     description: The output image url
+  - name: commit
+    description: The checked out commit hash
   steps:
-  - name: set-directories
+  - name: create-directories
     image: alpine:latest
     script: |
       echo "$(inputs.params.uid)"
@@ -43,5 +62,35 @@ spec:
       echo -n "$(workspaces.pipeline.path)/dummyUid/artefacts" > /tekton/results/artefactDir
       ls -la "$(workspaces.pipeline.path)/"
       ls -la "$(workspaces.pipeline.path)/dummyUid/"
+    securityContext:
+      runAsUser: 0
+  - name: clone
+    image: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:latest
+    script: |
+      CHECKOUT_DIR="$(workspaces.pipeline.path)/dummyUid/source"
+
+      /ko-app/git-init \
+        -url "$(inputs.params.url)" \
+        -revision "$(inputs.params.revision)" \
+        -path "$CHECKOUT_DIR" \
+        -sslVerify "$(inputs.params.sslVerify)"
+      cd "$CHECKOUT_DIR"
+      RESULT_SHA="$(git rev-parse HEAD | tr -d '\n')"
+      EXIT_CODE="$?"
+      if [ "$EXIT_CODE" != 0 ]
+      then
+        exit $EXIT_CODE
+      fi
+
+      ls -la $CHECKOUT_DIR
+      # Make sure we don't add a trailing newline to the result!
+      echo -n "$RESULT_SHA" > /tekton/results/commit
+    securityContext:
+      runAsUser: 0
+  - name: extract-parameters
+    image: alpine:latest
+    script: |
+      cat "$(workspaces.pipeline.path)/dummyUid/source/imageurl"
+      cat "$(workspaces.pipeline.path)/dummyUid/source/imageurl" > /tekton/results/imageUrl
     securityContext:
       runAsUser: 0

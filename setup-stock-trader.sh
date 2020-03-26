@@ -13,12 +13,28 @@
 #   limitations under the License.
 #!/bin/bash
 
-export OC_PROJECT=tekton
-oc create project $OC_PROJECT
+export OC_PROJECT=tektondemo
+oc new-project $OC_PROJECT
 oc project $OC_PROJECT
 
-# Tekton pipeline prep
-oc apply -f https://raw.githubusercontent.com/tektoncd/catalog/master/git/git-clone.yaml # gite clone task, to be used instead of the old PipelineResource
+###### Tekton pipeline prep
+oc apply -f tekton-setup/github-binding.yaml
+oc apply -f tekton-setup/trigger-role.yaml
+oc apply -f tekton-setup/trigger-rolebinding.yaml
 
-# Postgresql ephemeral database instance
+###### Tekton task setup
+oc apply -f tekton-tasks/cleanup-folder.yaml
+oc apply -f tekton-tasks/container-build-push.yaml
+oc apply -f tekton-tasks/init-pipeline.yaml
+oc apply -f tekton-tasks/maven.yaml
+
+###### Tekton container build pipeline
+oc apply -f container-build-pipeline/pipeline.yaml
+oc apply -f container-build-pipeline/triggertemplate.yaml
+oc apply -f container-build-pipeline/eventlistener.yaml
+# Expose the route
+oc expose svc/el-github-listener-container-build
+# run "oc get route" and extract the route to configure github
+
+###### Postgresql ephemeral database instance
 oc new-app --template=postgresql-ephemeral -p POSTGRESQL_USER=postgresql -p POSTGRESQL_PASSWORD=postgresql

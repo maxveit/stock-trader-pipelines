@@ -15,7 +15,7 @@
 apiVersion: tekton.dev/v1alpha1
 kind: Pipeline
 metadata:
-  name: flyway-container-build
+  name: maven-build
 spec:
   params:
   - name: buildUid
@@ -33,35 +33,26 @@ spec:
     workspaces:
     - name: pipeline
       workspace: pipeline-workspace
-  - name: set-directories
+  - name: init
     runAfter:
       - cleanup-folder
     taskRef:
-      name: set-directories
+      name: init-pipeline
     params:
     - name: uid
       value: $(params.buildUid)
-    workspaces:
-    - name: pipeline
-      workspace: pipeline-workspace
-  - name: fetch-repository
-    runAfter:
-      - set-directories
-    taskRef:
-      name: git-clone
-    workspaces:
-    - name: pipeline
-      workspace: pipeline-workspace
-    params:
     - name: url
       value: $(params.gitUrl)
     - name: revision
       value: $(params.gitRevision)
     - name: sourceDir
-      value: "/workspace/pipeline/dummyUid/" # $(tasks.set-directories.results.sourceDir)
-  - name: flyway-container-build
+      value: "/workspace/pipeline/dummyUid/source" # $(tasks.init.results.sourceDir)
+    workspaces:
+    - name: pipeline
+      workspace: pipeline-workspace
+  - name: container-build
     runAfter:
-      - fetch-repository
+      - init
     taskRef:
       name: container-build-push
     workspaces:
@@ -69,9 +60,8 @@ spec:
       workspace: pipeline-workspace
     params:
       - name: sourceDir
-        value: "/workspace/pipeline/dummyUid/" # $(tasks.set-directories.results.sourceDir)
+        value: "/workspace/pipeline/dummyUid/source" # $(tasks.init.results.sourceDir)
       - name: context
-        value: "flyway/"
+        value: "/"
       - name: imageUrl
-        value: image-registry.openshift-image-registry.svc:5000/tekton/flyway
-      
+        value: image-registry.openshift-image-registry.svc:5000/tektondemo/flyway # $(tasks.init.results.imageUrl)

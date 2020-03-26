@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1alpha1
 kind: TriggerTemplate
 metadata:
-  name: flyway-container-build
+  name: maven-build
 spec:
   params:
   - name: gitRevision
@@ -12,10 +12,10 @@ spec:
   - apiVersion: tekton.dev/v1alpha1
     kind: PipelineRun
     metadata:
-      generateName: flyway-pipelinerun-
+      generateName: maven-build-pipelinerun-
     spec:
       pipelineRef:
-        name: flyway-container-build
+        name: maven-build
       params:
       - name: buildUid
         value: $(uid)
