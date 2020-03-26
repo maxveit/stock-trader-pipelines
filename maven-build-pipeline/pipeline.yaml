@@ -93,8 +93,8 @@ spec:
     params:
       - name: sourceDir
         value: "/workspace/pipeline/dummyUid/source" # $(tasks.init.results.sourceDir)
-      - name: artefactDir
-        value: "/workspace/pipeline/dummyUid/artefacts" # $(tasks.init.results.sourceDir)
+      - name: extraArgs
+        value: "--build-arg=ARTEFACT_DIR=../artefacts" # $(tasks.init.results.artefactDir)
       - name: context
         value: "/"
       - name: imageUrl

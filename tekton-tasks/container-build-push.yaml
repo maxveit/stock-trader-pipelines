@@ -35,9 +35,9 @@ spec:
     - name: sourceDir
       description: defines the directory where the source can be found
       type: string
-    - name: artefactDir
-      description: defines the directory where the artefacts can be found, e.g. build results from previous steps
-      type: string
+    - name: extraArgs
+      description: Additional arguments to pass to the Kaniko executor
+      default: ""
   steps:
   - name: debug
     image: alpine:latest
@@ -45,17 +45,17 @@ spec:
         ls -la $(inputs.params.sourceDir)/$(inputs.params.context)
         cd $(inputs.params.sourceDir)/$(inputs.params.context)
         cat $(inputs.params.dockerfile)
+        echo "Extra args: $(inputs.params.extraArgs)"
   - name: container-build-push
     workingdir: "$(inputs.params.sourceDir)/"
-    image: gcr.io/kaniko-project/executor:v0.13.0
+    image: gcr.io/kaniko-project/executor:latest
     env:
     - name: DOCKER_CONFIG
       value: /tekton/home/.docker
     command:
     - /kaniko/executor
+    - $(inputs.params.extraArgs)
     - --skip-tls-verify
-    - --build-arg SOURCE_DIR=$(inputs.params.sourceDir)
-    - --build-arg ARTEFACT_DIR=$(inputs.params.artefactDir)
     - --dockerfile=$(inputs.params.dockerfile)
     - --context=$(inputs.params.sourceDir)/$(inputs.params.context)
     - --destination=$(inputs.params.imageUrl)
