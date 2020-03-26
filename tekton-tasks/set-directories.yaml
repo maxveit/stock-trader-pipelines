@@ -33,12 +33,13 @@ spec:
   - name: set-directories
     image: alpine:latest
     script: |
-      mkdir "$(workspaces.pipeline.path)/$(inputs.params.uid)"
-      mkdir "$(workspaces.pipeline.path)/$(inputs.params.uid)/source"
-      mkdir "$(workspaces.pipeline.path)/$(inputs.params.uid)/artefacts"
-      echo -n "$(workspaces.pipeline.path)/$(inputs.params.uid)/source" > /tekton/results/sourceDir
-      echo -n "$(workspaces.pipeline.path)/$(inputs.params.uid)/artefacts" > /tekton/results/artefactDir
+      echo "$(inputs.params.uid)"
+      mkdir "$(workspaces.pipeline.path)/dummyUid"
+      mkdir "$(workspaces.pipeline.path)/dummyUid/source"
+      mkdir "$(workspaces.pipeline.path)/dummyUid/artefacts"
+      echo -n "$(workspaces.pipeline.path)/dummyUid/source" > /tekton/results/sourceDir
+      echo -n "$(workspaces.pipeline.path)/dummyUid/artefacts" > /tekton/results/artefactDir
       ls -la "$(workspaces.pipeline.path)/"
-      ls -la "$(workspaces.pipeline.path)/$(inputs.params.uid)/"
+      ls -la "$(workspaces.pipeline.path)/dummyUid/"
     securityContext:
       runAsUser: 0

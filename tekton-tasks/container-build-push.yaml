@@ -18,7 +18,7 @@ metadata:
   name: container-build-push
 spec:
   workspaces:
-  - name: source
+  - name: pipeline
     description: The workspace containing the source Dockerfile
   inputs:
     params:
@@ -32,9 +32,18 @@ spec:
       description: The destination tag to store the image
     - name: context
       description: Path within the workspace to find the Dockerfile
+    - name: sourceDir
+      description: defines the directory where the source can be found
+      type: string
   steps:
+  - name: debug
+    image: alpine:latest
+    script: |
+        ls -la $(inputs.params.sourceDir)/$(inputs.params.context)
+        cd $(inputs.params.sourceDir)/$(inputs.params.context)
+        cat $(inputs.params.dockerfile)
   - name: container-build-push
-    workingdir: "$(workspaces.source.path)/source"
+    workingdir: "$(inputs.params.sourceDir)/"
     image: gcr.io/kaniko-project/executor:v0.13.0
     env:
     - name: DOCKER_CONFIG
@@ -43,7 +52,7 @@ spec:
     - /kaniko/executor
     - --skip-tls-verify
     - --dockerfile=$(inputs.params.dockerfile)
-    - --context=$(workspaces.source.path)/$(inputs.params.context)
+    - --context=$(inputs.params.sourceDir)/$(inputs.params.context)
     - --destination=$(inputs.params.imageUrl)
     securityContext:
       runAsUser: 0

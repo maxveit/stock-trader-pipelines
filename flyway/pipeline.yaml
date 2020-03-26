@@ -24,7 +24,18 @@ spec:
   workspaces:
   - name: pipeline-workspace
   tasks:
+  - name: cleanup-folder
+    taskRef:
+      name: cleanup-folder
+    params:
+    - name: path
+      value: "dummyUid"
+    workspaces:
+    - name: pipeline
+      workspace: pipeline-workspace
   - name: set-directories
+    runAfter:
+      - cleanup-folder
     taskRef:
       name: set-directories
     params:
@@ -39,7 +50,7 @@ spec:
     taskRef:
       name: git-clone
     workspaces:
-    - name: source
+    - name: pipeline
       workspace: pipeline-workspace
     params:
     - name: url
@@ -47,18 +58,20 @@ spec:
     - name: revision
       value: $(params.gitRevision)
     - name: sourceDir
-      value: $(tasks.set-directories.results.sourceDir)
+      value: "/workspace/pipeline/dummyUid/" # $(tasks.set-directories.results.sourceDir)
   - name: flyway-container-build
     runAfter:
       - fetch-repository
     taskRef:
       name: container-build-push
     workspaces:
-    - name: source
+    - name: pipeline
       workspace: pipeline-workspace
     params:
+      - name: sourceDir
+        value: "/workspace/pipeline/dummyUid/" # $(tasks.set-directories.results.sourceDir)
       - name: context
         value: "flyway/"
       - name: imageUrl
-        value: $(imageUrl)
+        value: image-registry.openshift-image-registry.svc:5000/tekton/flyway
       

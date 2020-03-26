@@ -18,14 +18,16 @@ metadata:
   name: cleanup-folder
 spec:
   workspaces:
-  - name: workspace
+  - name: pipeline
     description: The workspace to be cleaned up
   inputs:
     params:
-    - name: PATH
+    - name: path
       description: To be cleaned up path using rm -rf
   steps:
   - name: cleanup-folder
     image: alpine:latest
     script: |
-      rm -rf $(inputs.params.PATH)
+      rm -rf "$(workspaces.pipeline.path)/$(inputs.params.path)"
+    securityContext:
+      runAsUser: 0

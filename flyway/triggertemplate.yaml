@@ -8,8 +8,6 @@ spec:
     description: The git revision
   - name: gitUrl
     description: The git repository url
-  - name: imageUrl
-    default: image-registry.openshift-image-registry.svc:5000/tekton/flyway
   resourcetemplates:
   - apiVersion: tekton.dev/v1alpha1
     kind: PipelineRun

@@ -20,7 +20,7 @@ spec:
       description: defines the directory where the source should be checked out to
       type: string
   workspaces:
-  - name: source
+  - name: pipeline
     description: The git repo will be cloned onto the volume backing this workspace
   results:
   - name: commit
