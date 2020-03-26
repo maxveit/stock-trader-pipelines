@@ -35,6 +35,9 @@ spec:
     - name: sourceDir
       description: defines the directory where the source can be found
       type: string
+    - name: artefactDir
+      description: defines the directory where the artefacts can be found, e.g. build results from previous steps
+      type: string
   steps:
   - name: debug
     image: alpine:latest
@@ -51,6 +54,8 @@ spec:
     command:
     - /kaniko/executor
     - --skip-tls-verify
+    - --build-arg SOURCE_DIR=$(inputs.params.sourceDir)
+    - --build-arg ARTEFACT_DIR=$(inputs.params.artefactDir)
     - --dockerfile=$(inputs.params.dockerfile)
     - --context=$(inputs.params.sourceDir)/$(inputs.params.context)
     - --destination=$(inputs.params.imageUrl)

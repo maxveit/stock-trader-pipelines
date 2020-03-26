@@ -29,6 +29,9 @@ spec:
     - name: extraArgs
       description: Additional parameters for mvn
       default: ""
+    - name: copyResults
+      description: Copies Openliberty maven build results if set to true
+      default: "false"
   workspaces:
   - name: pipeline
     description: The git repo will be cloned onto the volume backing this workspace
@@ -38,10 +41,23 @@ spec:
     script: |
         ls -la $(inputs.params.sourceDir);
         /usr/bin/mvn -f $(inputs.params.sourceDir)/pom.xml $(inputs.params.goals) $(inputs.params.extraArgs);
-        ls -la /workspace/source/target;
     volumeMounts:
       - name: m2-repository
         mountPath: /.m2
+    securityContext:
+      runAsUser: 0
+  - name: copy-results
+    image: alpine:latest
+    script: |
+        if [ "$(inputs.params.copyResults)" = "true" ]; then
+            ls -la $(inputs.params.sourceDir)/target;
+            mv $(inputs.params.sourceDir)/target $(inputs.params.artefactDir)/binaries
+            mv $(inputs.params.sourceDir)/src/main/liberty/config $(inputs.params.artefactDir)/config
+            ls -la $(inputs.params.artefactDir)/binaries
+            ls -la $(inputs.params.artefactDir)/config
+        fi
+    securityContext:
+      runAsUser: 0
   volumes:
     - name: m2-repository
       emptyDir: {}

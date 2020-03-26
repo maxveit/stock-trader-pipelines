@@ -50,9 +50,41 @@ spec:
     workspaces:
     - name: pipeline
       workspace: pipeline-workspace
-  - name: container-build
+  - name: maven-build
     runAfter:
       - init
+    taskRef:
+      name: maven
+    workspaces:
+    - name: pipeline
+      workspace: pipeline-workspace
+    params:
+      - name: sourceDir
+        value: "/workspace/pipeline/dummyUid/source" # $(tasks.init.results.sourceDir)
+      - name: artefactDir
+        value: "/workspace/pipeline/dummyUid/artefacts" # $(tasks.init.results.sourceDir)
+      - name: goals
+        value: "package"
+      - name: copyResults
+        value: "true"
+  - name: flyway
+    runAfter:
+      - init
+    taskRef:
+      name: maven
+    workspaces:
+    - name: pipeline
+      workspace: pipeline-workspace
+    params:
+      - name: sourceDir
+        value: "/workspace/pipeline/dummyUid/source" # $(tasks.init.results.sourceDir)
+      - name: artefactDir
+        value: "/workspace/pipeline/dummyUid/artefacts" # $(tasks.init.results.sourceDir)
+      - name: goals
+        value: "flyway:migrate"
+  - name: container-build
+    runAfter:
+      - maven-build
     taskRef:
       name: container-build-push
     workspaces:
@@ -61,7 +93,9 @@ spec:
     params:
       - name: sourceDir
         value: "/workspace/pipeline/dummyUid/source" # $(tasks.init.results.sourceDir)
+      - name: artefactDir
+        value: "/workspace/pipeline/dummyUid/artefacts" # $(tasks.init.results.sourceDir)
       - name: context
         value: "/"
       - name: imageUrl
-        value: image-registry.openshift-image-registry.svc:5000/tektondemo/flyway # $(tasks.init.results.imageUrl)
+        value: image-registry.openshift-image-registry.svc:5000/tektondemo/portfolio # $(tasks.init.results.imageUrl)

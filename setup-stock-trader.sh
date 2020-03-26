@@ -36,5 +36,13 @@ oc apply -f container-build-pipeline/eventlistener.yaml
 oc expose svc/el-github-listener-container-build
 # run "oc get route" and extract the route to configure github
 
+###### Tekton maven build pipeline
+oc apply -f maven-build-pipeline/eventlistener.yaml 
+oc apply -f maven-build-pipeline/pipeline.yaml
+oc apply -f maven-build-pipeline/triggertemplate.yaml
+# Expose the route
+oc expose svc/el-github-listener-maven-build
+# run "oc get route" and extract the route to configure github
+
 ###### Postgresql ephemeral database instance
-oc new-app --template=postgresql-ephemeral -p POSTGRESQL_USER=postgresql -p POSTGRESQL_PASSWORD=postgresql
+oc new-app --template=postgresql-ephemeral -p POSTGRESQL_USER=postgresql -p POSTGRESQL_PASSWORD=postgresql -p POSTGRESQL_DATABASE=portfolio

@@ -47,6 +47,8 @@ spec:
       value: $(params.gitRevision)
     - name: sourceDir
       value: "/workspace/pipeline/dummyUid/source" # $(tasks.init.results.sourceDir)
+    - name: artefactDir
+      value: "/workspace/pipeline/dummyUid/artefacts" # $(tasks.init.results.sourceDir)
     workspaces:
     - name: pipeline
       workspace: pipeline-workspace
@@ -61,6 +63,8 @@ spec:
     params:
       - name: sourceDir
         value: "/workspace/pipeline/dummyUid/source" # $(tasks.init.results.sourceDir)
+      - name: artefactDir
+        value: "/workspace/pipeline/dummyUid/artefacts" # $(tasks.init.results.sourceDir)
       - name: context
         value: "/"
       - name: imageUrl
