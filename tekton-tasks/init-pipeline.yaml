@@ -15,7 +15,7 @@
 apiVersion: tekton.dev/v1alpha1
 kind: Task
 metadata:
-  name: set-directories
+  name: init-pipeline
 spec:
   inputs:
     params:
@@ -29,6 +29,8 @@ spec:
     description: The directory containing the source code
   - name: artefactDir
     description: The directory containing the build artefacts
+  - name: imageUrl
+    description: The output image url
   steps:
   - name: set-directories
     image: alpine:latest

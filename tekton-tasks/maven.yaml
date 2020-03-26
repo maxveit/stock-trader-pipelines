@@ -1,0 +1,47 @@
+#       Copyright 2017-2019 IBM Corp All Rights Reserved
+
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+
+#       http://www.apache.org/licenses/LICENSE-2.0
+
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+
+apiVersion: tekton.dev/v1alpha1
+kind: Task
+metadata:
+  name: maven
+spec:
+  inputs:
+    params:
+    - name: goals
+      description: The Maven goals to run
+      default: "package"
+    - name: sourceDir
+      description: The source directory
+    - name: artefactDir
+      description: The artefact directory
+    - name: extraArgs
+      description: Additional parameters for mvn
+      default: ""
+  workspaces:
+  - name: pipeline
+    description: The git repo will be cloned onto the volume backing this workspace
+  steps:
+  - name: maven-build
+    image: maven:3.6-jdk-11-slim
+    script: |
+        ls -la $(inputs.params.sourceDir);
+        /usr/bin/mvn -f $(inputs.params.sourceDir)/pom.xml $(inputs.params.goals) $(inputs.params.extraArgs);
+        ls -la /workspace/source/target;
+    volumeMounts:
+      - name: m2-repository
+        mountPath: /.m2
+  volumes:
+    - name: m2-repository
+      emptyDir: {}

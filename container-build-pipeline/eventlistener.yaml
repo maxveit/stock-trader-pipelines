@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1alpha1
 kind: EventListener
 metadata:
-  name: github-listener-flyway
+  name: github-listener-container-build
 spec:
   #serviceAccountName: tekton-triggers-example-sa
   triggers:
@@ -17,4 +17,4 @@ spec:
       bindings:
         - name: github-binding
       template:
-        name: flyway-container-build
+        name: container-build

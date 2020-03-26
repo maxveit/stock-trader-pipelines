@@ -1,0 +1,29 @@
+apiVersion: tekton.dev/v1alpha1
+kind: TriggerTemplate
+metadata:
+  name: container-build
+spec:
+  params:
+  - name: gitRevision
+    description: The git revision
+  - name: gitUrl
+    description: The git repository url
+  resourcetemplates:
+  - apiVersion: tekton.dev/v1alpha1
+    kind: PipelineRun
+    metadata:
+      generateName: container-build-pipelinerun-
+    spec:
+      pipelineRef:
+        name: container-build
+      params:
+      - name: buildUid
+        value: $(uid)
+      - name: gitRevision
+        value: $(params.gitRevision)
+      - name: gitUrl
+        value: $(params.gitUrl)
+      workspaces:
+      - name: pipeline-workspace
+        persistentVolumeClaim:
+          claimName: workspace-pvc
