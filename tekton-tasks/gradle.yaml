@@ -12,15 +12,16 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-apiVersion: tekton.dev/v1beta1
+apiVersion: tekton.dev/v1alpha1
 kind: Task
 metadata:
-  name: maven
+  name: gradle
 spec:
-  params:
+  inputs:
+    params:
     - name: goals
-      description: The Maven goals to run
-      default: "package"
+      description: The Gradle goals to run
+      default: "quarkusBuild"
     - name: sourceDir
       description: The source directory
     - name: artefactDir
@@ -29,7 +30,7 @@ spec:
       description: Additional parameters for mvn
       default: ""
     - name: copyResults
-      description: Copies Openliberty maven build results if set to true
+      description: Copies gradle build results if set to true
       default: "false"
   workspaces:
   - name: pipeline

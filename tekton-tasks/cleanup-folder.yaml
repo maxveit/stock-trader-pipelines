@@ -12,7 +12,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-apiVersion: tekton.dev/v1alpha1
+apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
   name: cleanup-folder
@@ -20,10 +20,9 @@ spec:
   workspaces:
   - name: pipeline
     description: The workspace to be cleaned up
-  inputs:
-    params:
-    - name: path
-      description: To be cleaned up path using rm -rf
+  params:
+  - name: path
+    description: To be cleaned up path using rm -rf
   steps:
   - name: cleanup-folder
     image: alpine:latest

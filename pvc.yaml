@@ -22,8 +22,7 @@ metadata:
    zone: # Example: dal13
 spec:
  accessModes:
-   - ReadWriteMany
+   - ReadWriteOnce
  resources:
    requests:
      storage: 1Gi
- storageClassName: ibmc-file-gold

@@ -1,10 +1,9 @@
-apiVersion: tekton.dev/v1alpha1
+apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
   name: git-clone
 spec:
-  inputs:
-    params:
+  params:
     - name: url
       description: git url to clone
       type: string

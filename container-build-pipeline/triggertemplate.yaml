@@ -1,4 +1,4 @@
-apiVersion: tekton.dev/v1alpha1
+apiVersion: triggers.tekton.dev/v1alpha1
 kind: TriggerTemplate
 metadata:
   name: container-build
@@ -9,7 +9,7 @@ spec:
   - name: gitUrl
     description: The git repository url
   resourcetemplates:
-  - apiVersion: tekton.dev/v1alpha1
+  - apiVersion: tekton.dev/v1beta1
     kind: PipelineRun
     metadata:
       generateName: container-build-pipelinerun-
@@ -20,9 +20,9 @@ spec:
       - name: buildUid
         value: $(uid)
       - name: gitRevision
-        value: $(params.gitRevision)
+        value: $(tt.params.gitRevision)
       - name: gitUrl
-        value: $(params.gitUrl)
+        value: $(tt.params.gitUrl)
       workspaces:
       - name: pipeline-workspace
         persistentVolumeClaim:

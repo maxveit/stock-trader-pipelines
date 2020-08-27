@@ -15,13 +15,12 @@
 # remarks
 # # CHECKOUT_DIR="$(inputs.params.sourceDir)/"
 
-apiVersion: tekton.dev/v1alpha1
+apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
   name: init-pipeline
 spec:
-  inputs:
-    params:
+  params:
     - name: uid
       type: string
       description: Unique build Uid
@@ -36,9 +35,6 @@ spec:
       description: defines if http.sslVerify should be set to true or false in the global git config
       type: string
       default: "true"
-    - name: sourceDir
-      description: defines the directory where the source should be checked out to
-      type: string
   workspaces:
   - name: pipeline
   results:
@@ -54,20 +50,19 @@ spec:
   - name: create-directories
     image: alpine:latest
     script: |
-      echo "$(inputs.params.uid)"
-      mkdir "$(workspaces.pipeline.path)/dummyUid"
-      mkdir "$(workspaces.pipeline.path)/dummyUid/source"
-      mkdir "$(workspaces.pipeline.path)/dummyUid/artefacts"
-      echo -n "$(workspaces.pipeline.path)/dummyUid/source" > /tekton/results/sourceDir
-      echo -n "$(workspaces.pipeline.path)/dummyUid/artefacts" > /tekton/results/artefactDir
+      mkdir "$(workspaces.pipeline.path)/$(inputs.params.uid)"
+      mkdir "$(workspaces.pipeline.path)/$(inputs.params.uid)/source"
+      mkdir "$(workspaces.pipeline.path)/$(inputs.params.uid)/artefacts"
+      echo -n "$(workspaces.pipeline.path)/$(inputs.params.uid)/source" > /tekton/results/sourceDir
+      echo -n "$(workspaces.pipeline.path)/$(inputs.params.uid)/artefacts" > /tekton/results/artefactDir
       ls -la "$(workspaces.pipeline.path)/"
-      ls -la "$(workspaces.pipeline.path)/dummyUid/"
+      ls -la "$(workspaces.pipeline.path)/$(inputs.params.uid)/"
     securityContext:
       runAsUser: 0
   - name: clone
     image: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:latest
     script: |
-      CHECKOUT_DIR="$(workspaces.pipeline.path)/dummyUid/source"
+      CHECKOUT_DIR="$(workspaces.pipeline.path)/$(inputs.params.uid)/source"
 
       /ko-app/git-init \
         -url "$(inputs.params.url)" \
@@ -90,7 +85,7 @@ spec:
   - name: extract-parameters
     image: alpine:latest
     script: |
-      cat "$(workspaces.pipeline.path)/dummyUid/source/imageurl"
-      cat "$(workspaces.pipeline.path)/dummyUid/source/imageurl" > /tekton/results/imageUrl
+      cat "$(workspaces.pipeline.path)/$(inputs.params.uid)/source/imageurl"
+      cat "$(workspaces.pipeline.path)/$(inputs.params.uid)/source/imageurl" > /tekton/results/imageUrl
     securityContext:
       runAsUser: 0

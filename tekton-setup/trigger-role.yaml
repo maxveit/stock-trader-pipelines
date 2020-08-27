@@ -4,7 +4,7 @@ metadata:
   name: tekton-triggers-minimal
 rules:
 # Permissions for every EventListener deployment to function
-- apiGroups: ["tekton.dev"]
+- apiGroups: ["triggers.tekton.dev"]
   resources: ["eventlisteners", "triggerbindings", "triggertemplates"]
   verbs: ["get"]
 - apiGroups: [""]
