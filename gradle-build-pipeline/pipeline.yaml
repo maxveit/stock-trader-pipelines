@@ -24,18 +24,7 @@ spec:
   workspaces:
   - name: pipeline-workspace
   tasks:
-  #- name: cleanup-folder
-  #  taskRef:
-  #    name: cleanup-folder
-  #  params:
-  #  - name: path
-  #    value: $(params.buildUid)
-  #  workspaces:
-  #  - name: pipeline
-  #    workspace: pipeline-workspace
   - name: init
-  #  runAfter:
-  #    - cleanup-folder
     taskRef:
       name: init-pipeline
     params:
