@@ -1,7 +1,7 @@
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: TriggerTemplate
 metadata:
-  name: container-build
+  name: gradle-build
 spec:
   params:
   - name: gitRevision
@@ -16,10 +16,10 @@ spec:
   - apiVersion: tekton.dev/v1beta1
     kind: PipelineRun
     metadata:
-      name: container-$(params.gitRepoName)-$(uid)
+      name: gradle-$(params.gitRepoName)-$(uid)
     spec:
       pipelineRef:
-        name: container-build
+        name: gradle-build
       params:
       - name: buildUid
         value: $(uid)
