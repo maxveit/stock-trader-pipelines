@@ -8,11 +8,15 @@ spec:
     description: The git revision
   - name: gitUrl
     description: The git repository url
+  - name: gitRepoName
+    description: The git repo name
+  #- name: gitBranchName
+  #  description: The git branch name
   resourcetemplates:
   - apiVersion: tekton.dev/v1beta1
     kind: PipelineRun
     metadata:
-      generateName: container-build-pipelinerun-
+      name: build-$(params.gitRepoName)-$(uid)
     spec:
       pipelineRef:
         name: container-build
@@ -20,9 +24,9 @@ spec:
       - name: buildUid
         value: $(uid)
       - name: gitRevision
-        value: $(tt.params.gitRevision)
+        value: $(params.gitRevision)
       - name: gitUrl
-        value: $(tt.params.gitUrl)
+        value: $(params.gitUrl)
       workspaces:
       - name: pipeline-workspace
         persistentVolumeClaim:

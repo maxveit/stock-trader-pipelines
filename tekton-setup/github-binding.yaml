@@ -8,5 +8,9 @@ spec:
     value: $(body.head_commit.id)
   - name: gitUrl
     value: $(body.repository.url)
+  - name: gitRepoName
+    value: $(body.repository.name)
+  #- name: gitBranchName
+  #  value: $(body.repository.branch)
   #- name: contentType
   #  value: $(header.content-type)

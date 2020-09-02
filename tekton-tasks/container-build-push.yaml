@@ -27,6 +27,9 @@ spec:
     - name: context
       description: The build context used by Kaniko.
       default: ./
+    - name: tlsverify
+      description: Enable TLS verification
+      default: "false"
     - name: imageUrl
       description: The destination tag to store the image
     - name: context
@@ -45,18 +48,55 @@ spec:
         cd $(inputs.params.sourceDir)/$(inputs.params.context)
         cat $(inputs.params.dockerfile)
         echo "Extra args: $(inputs.params.extraArgs)"
-  - name: container-build-push
-    workingdir: "$(inputs.params.sourceDir)/"
-    image: gcr.io/kaniko-project/executor:latest
-    env:
-    - name: DOCKER_CONFIG
-      value: /tekton/home/.docker
+#  - name: container-build-push
+#    workingdir: "$(inputs.params.sourceDir)/"
+#    image: gcr.io/kaniko-project/executor:latest
+#    env:
+#    - name: DOCKER_CONFIG
+#      value: /tekton/home/.docker
+#    command:
+#    - /kaniko/executor
+#    - $(inputs.params.extraArgs)
+#    - --skip-tls-verify
+#    - --dockerfile=$(inputs.params.dockerfile)
+#    - --context=$(inputs.params.sourceDir)/$(inputs.params.context)
+#    - --destination=$(inputs.params.imageUrl)
+#    securityContext:
+#      runAsUser: 0
+  - name: build
     command:
-    - /kaniko/executor
-    - $(inputs.params.extraArgs)
-    - --skip-tls-verify
-    - --dockerfile=$(inputs.params.dockerfile)
-    - --context=$(inputs.params.sourceDir)/$(inputs.params.context)
-    - --destination=$(inputs.params.imageUrl)
+      - buildah
+      - bud
+      - '--tls-verify=$(inputs.params.tlsverify)'
+      - '--layers'
+      - '--storage-driver=vfs'
+      - '-f'
+      - $(inputs.params.dockerfile)
+      - '-t'
+      - $(inputs.params.imageUrl)
+      - .
+    image: registry.redhat.io/rhel8/buildah
+    resources: {}
     securityContext:
-      runAsUser: 0
+      privileged: true
+    workingDir: "$(inputs.params.sourceDir)/"
+    volumeMounts:
+      - mountPath: /var/lib/containers
+        name: varlibcontainers
+  - name: push
+    command:
+      - buildah
+      - push
+      - '--storage-driver=vfs'
+      - '--tls-verify=$(inputs.params.tlsverify)'
+      - $(inputs.params.imageUrl)
+    image: registry.redhat.io/rhel8/buildah
+    resources: {}
+    securityContext:
+      privileged: true
+    volumeMounts:
+      - mountPath: /var/lib/containers
+        name: varlibcontainers
+  volumes:
+    - emptyDir: {}
+      name: varlibcontainers

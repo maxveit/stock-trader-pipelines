@@ -24,38 +24,20 @@ spec:
       default: "quarkusBuild"
     - name: sourceDir
       description: The source directory
-    - name: artefactDir
-      description: The artefact directory
-    - name: extraArgs
-      description: Additional parameters for mvn
       default: ""
-    - name: copyResults
-      description: Copies gradle build results if set to true
-      default: "false"
   workspaces:
   - name: pipeline
     description: The git repo will be cloned onto the volume backing this workspace
   steps:
-  - name: maven-build
-    image: maven:3.6-jdk-11-slim
+  - name: gradle-build
+    image: adoptopenjdk:11-jdk-openj9
     script: |
         ls -la $(inputs.params.sourceDir);
-        /usr/bin/mvn -f $(inputs.params.sourceDir)/pom.xml $(inputs.params.goals) $(inputs.params.extraArgs);
+        cd $(inputs.params.sourceDir)
+        ./gradlew $(inputs.params.goals)
     volumeMounts:
       - name: m2-repository
         mountPath: /.m2
-    securityContext:
-      runAsUser: 0
-  - name: copy-results
-    image: alpine:latest
-    script: |
-        if [ "$(inputs.params.copyResults)" = "true" ]; then
-            ls -la $(inputs.params.sourceDir)/target;
-            mv $(inputs.params.sourceDir)/target $(inputs.params.artefactDir)/binaries
-            mv $(inputs.params.sourceDir)/src/main/liberty/config $(inputs.params.artefactDir)/config
-            ls -la $(inputs.params.artefactDir)/binaries
-            ls -la $(inputs.params.artefactDir)/config
-        fi
     securityContext:
       runAsUser: 0
   volumes:
