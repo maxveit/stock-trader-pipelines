@@ -18,8 +18,6 @@ metadata:
  name: workspace-pvc
  labels:
    billingType: hourly
-   region: # Example: us-south
-   zone: # Example: dal13
 spec:
  accessModes:
    - ReadWriteOnce
