@@ -23,3 +23,9 @@ This would create a https route with edge termination for the container build li
 * container-build-pipeline - build and push a container - the sole requirement is a "imageurl" file which contains nothing but the path and tag of the built image, and a Dockerfile which is to be built
 * gradle-build-pipeline - this is an extension of the container-build-pipeline and has been tested using the gradlew wrapper from a standard Quarkus build
 * maven-build-pipeline - this is an extension of the container-build pipeline and has been tested building a OpenLiberty application
+
+## pulling from a private repo / adding a SSH key
+You have to fill the secret.yaml file with two base64 encoded strings. Assuming, that you already have a public / private key pair and added the public key pair to your user or repo as deploy key, you have to do the following:
+* ssh-keyscan -H github.com > base64
+* cat id_rsa > base64
+The two strings have to be added to the secret.yaml sections id_rsa and known_hosts. That's it. They will be processed accordingly as part of the /tekton-tasks/init-pipeline.yaml.

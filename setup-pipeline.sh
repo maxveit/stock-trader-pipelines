@@ -18,6 +18,7 @@ oc new-project $OC_PROJECT
 oc project $OC_PROJECT
 
 ###### Tekton pipeline prep
+oc apply -f secret.yaml
 oc apply -f tekton-setup/github-binding.yaml
 oc apply -f tekton-setup/trigger-role.yaml
 oc apply -f tekton-setup/trigger-rolebinding.yaml
@@ -32,8 +33,9 @@ oc apply -f tekton-tasks/maven.yaml
 oc apply -f container-build-pipeline/pipeline.yaml
 oc apply -f container-build-pipeline/triggertemplate.yaml
 oc apply -f container-build-pipeline/eventlistener.yaml
-# Expose the route
-oc expose svc/el-github-listener-container-build
+# Expose the route as edge routes (creates https endpoints that offload TLS)
+oc create route edge el-github-listener-container-build --service=el-github-listener-container-build
+oc create route edge el-github-listener-gradle-build --service=el-github-listener-gradle-build
 # run "oc get route" and extract the route to configure github
 
 ###### Tekton maven build pipeline
@@ -43,6 +45,3 @@ oc expose svc/el-github-listener-container-build
 # Expose the route
 #oc expose svc/el-github-listener-maven-build
 # run "oc get route" and extract the route to configure github
-
-###### Postgresql ephemeral database instance
-#oc new-app --template=postgresql-ephemeral -p POSTGRESQL_USER=postgresql -p POSTGRESQL_PASSWORD=postgresql -p POSTGRESQL_DATABASE=portfolio
