@@ -1,0 +1,8 @@
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: service-provisioning
+rules:
+- apiGroups: ["ibmcloud.ibm.com"]
+  resources: ["services", "bindings"]
+  verbs: ["create", "get", "update"]

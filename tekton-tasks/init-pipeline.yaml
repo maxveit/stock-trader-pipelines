@@ -46,6 +46,8 @@ spec:
     description: The output image url
   - name: commit
     description: The checked out commit hash
+  - name: services
+    description: service.yaml file path containing the to be provisioned services
   steps:
   - name: create-directories
     image: alpine:latest
@@ -93,6 +95,7 @@ spec:
     script: |
       cat "$(workspaces.pipeline.path)/$(inputs.params.uid)/source/imageurl"
       cat "$(workspaces.pipeline.path)/$(inputs.params.uid)/source/imageurl" > /tekton/results/imageUrl
+      echo -n "$(workspaces.pipeline.path)/$(inputs.params.uid)/source/services.yaml" > /tekton/results/services
     securityContext:
       runAsUser: 0
   volumes:

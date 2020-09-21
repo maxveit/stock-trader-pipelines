@@ -52,3 +52,15 @@ spec:
         value: "/"
       - name: imageUrl
         value: $(tasks.init.results.imageUrl)
+  - name: provision-services
+    runAfter:
+      - init
+    taskRef:
+      name: provision-services
+    workspaces:
+    - name: pipeline
+      workspace: pipeline-workspace
+    params:
+      - name: file
+        value: $(tasks.init.results.services)
+        

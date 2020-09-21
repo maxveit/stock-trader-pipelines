@@ -20,6 +20,9 @@ spec:
     spec:
       pipelineRef:
         name: gradle-build
+      serviceAccountNames:
+      - taskName: provision-services
+        serviceAccountName: service-deploy
       params:
       - name: buildUid
         value: $(uid)

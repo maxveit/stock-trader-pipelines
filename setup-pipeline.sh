@@ -17,6 +17,12 @@ export OC_PROJECT=demo
 oc new-project $OC_PROJECT
 oc project $OC_PROJECT
 
+###### Create service account and add permissions for Service Provisioning
+oc create sa service-deploy # This must be kept
+## Remove the next two lines if you haven't deployed the IBM Cloud Operator in your cluster
+oc apply -f tekton-setup/service-provision-role.yaml
+oc apply -f tekton-setup/service-provision-rolebinding.yaml 
+
 ###### Tekton pipeline prep
 oc apply -f secret.yaml
 oc apply -f tekton-setup/github-binding.yaml
