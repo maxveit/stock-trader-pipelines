@@ -32,5 +32,12 @@ spec:
         value: $(params.gitUrl)
       workspaces:
       - name: pipeline-workspace
-        persistentVolumeClaim:
-          claimName: workspace-pvc
+        volumeClaimTemplate:
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+        #persistentVolumeClaim:
+        #  claimName: workspace-pvc

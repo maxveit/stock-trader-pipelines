@@ -29,10 +29,10 @@ spec:
     script: |
       #!/bin/bash
       set -ex
-      cat $(inputs.params.file)
 
       if [ -f $(inputs.params.file) ]
       then
+        cat $(inputs.params.file)
         kubectl apply -f "$(inputs.params.file)"
       else
         echo "No services file provided, not provisioning any services"

@@ -65,7 +65,7 @@ spec:
         value: $(tasks.init.results.imageUrl)
   - name: provision-services
     runAfter:
-      - init
+      - container-build
     taskRef:
       name: provision-services
     workspaces:

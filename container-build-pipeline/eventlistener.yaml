@@ -15,6 +15,6 @@ spec:
               - push
               - ping
       bindings:
-        - name: github-binding
+        - ref: github-binding
       template:
         name: container-build
