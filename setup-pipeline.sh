@@ -13,10 +13,6 @@
 #   limitations under the License.
 #!/bin/bash
 
-export OC_PROJECT=demo
-oc new-project $OC_PROJECT
-oc project $OC_PROJECT
-
 ###### Create service account and add permissions for Service Provisioning
 oc create sa service-deploy # This must be kept
 ## Remove the next two lines if you haven't deployed the IBM Cloud Operator in your cluster
@@ -39,15 +35,18 @@ oc apply -f tekton-tasks/maven.yaml
 oc apply -f container-build-pipeline/pipeline.yaml
 oc apply -f container-build-pipeline/triggertemplate.yaml
 oc apply -f container-build-pipeline/eventlistener.yaml
+
+###### Tekton maven build pipeline
+oc apply -f maven-build-pipeline/eventlistener.yaml 
+oc apply -f maven-build-pipeline/pipeline.yaml
+oc apply -f maven-build-pipeline/triggertemplate.yaml
+
+###### Tekton maven build pipeline
+oc apply -f gradle-build-pipeline/eventlistener.yaml 
+oc apply -f gradle-build-pipeline/pipeline.yaml
+oc apply -f gradle-build-pipeline/triggertemplate.yaml
+
 # Expose the route as edge routes (creates https endpoints that offload TLS)
 oc create route edge el-github-listener-container-build --service=el-github-listener-container-build
 oc create route edge el-github-listener-gradle-build --service=el-github-listener-gradle-build
-# run "oc get route" and extract the route to configure github
-
-###### Tekton maven build pipeline
-#oc apply -f maven-build-pipeline/eventlistener.yaml 
-#oc apply -f maven-build-pipeline/pipeline.yaml
-#oc apply -f maven-build-pipeline/triggertemplate.yaml
-# Expose the route
-#oc expose svc/el-github-listener-maven-build
-# run "oc get route" and extract the route to configure github
+oc create route edge el-github-listener-maven-build --service=el-github-listener-maven-build

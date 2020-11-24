@@ -1,4 +1,4 @@
-apiVersion: tekton.dev/v1alpha1
+apiVersion: triggers.tekton.dev/v1alpha1
 kind: EventListener
 metadata:
   name: github-listener-maven-build
@@ -15,6 +15,6 @@ spec:
               - push
               - ping
       bindings:
-        - name: github-binding
+        - ref: github-binding
       template:
         name: maven-build
