@@ -30,10 +30,16 @@ spec:
     params:
     - name: uid
       value: $(params.buildUid)
-    - name: url
+    - name: appUrl
       value: $(params.gitUrl)
-    - name: revision
+    - name: appRevision
       value: $(params.gitRevision)
+    - name: envUrl
+      value: git@github.com:maxveit/tekton-config.git
+    - name: envRevision
+      value: master
+    - name: env
+      value: "dev.yaml"
     workspaces:
     - name: pipeline
       workspace: pipeline-workspace
@@ -46,21 +52,21 @@ spec:
     - name: pipeline
       workspace: pipeline-workspace
     params:
-      - name: sourceDir
-        value: $(tasks.init.results.sourceDir)
-      - name: context
-        value: "/"
-      - name: imageUrl
-        value: $(tasks.init.results.imageUrl)
-  - name: provision-services
-    runAfter:
-      - container-build
-    taskRef:
-      name: provision-services
-    workspaces:
-    - name: pipeline
-      workspace: pipeline-workspace
-    params:
-      - name: file
-        value: $(tasks.init.results.services)
+      - name: appDir
+        value: $(tasks.init.results.appDir)
+      - name: envDir
+        value: $(tasks.init.results.envDir)
+      - name: paramSh
+        value: $(tasks.init.results.paramSh)
+ # - name: provision-services
+ #   runAfter:
+ #     - container-build
+ #   taskRef:
+ #     name: provision-services
+ #   workspaces:
+ #   - name: pipeline
+ #     workspace: pipeline-workspace
+ #   params:
+ #     - name: file
+ #       value: $(tasks.init.results.services)
         

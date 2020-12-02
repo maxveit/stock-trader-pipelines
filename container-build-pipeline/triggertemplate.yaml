@@ -21,8 +21,8 @@ spec:
       pipelineRef:
         name: container-build
       serviceAccountNames:
-      - taskName: provision-services
-        serviceAccountName: service-deploy
+      #- taskName: provision-services
+      #  serviceAccountName: service-deploy
       params:
       - name: buildUid
         value: $(uid)

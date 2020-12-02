@@ -19,13 +19,13 @@ metadata:
 spec:
   workspaces:
   - name: pipeline
-    description: The workspace to be cleaned up
+    description: The workspace
   params:
   - name: file
     description: File containing the services that are to be provisioned
   steps:
   - name: kubectl-apply
-    image: image-registry.openshift-image-registry.svc:5000/demo/tekton-kubectl:latest
+    image: image-registry.openshift-image-registry.svc:5000/cicd/tekton-kubectl:latest
     script: |
       #!/bin/bash
       set -ex

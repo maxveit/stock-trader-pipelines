@@ -1,0 +1,14 @@
+apiVersion: redhatcop.redhat.io/v1alpha1
+kind: QuayEcosystem
+metadata:
+  name: quay
+spec:
+  quay:
+    externalAccess:
+      type: Route
+      tls:
+        termination: edge
+    deploymentStrategy: RollingUpdate
+  clair:
+    enabled: true
+    updateInterval: "60m"

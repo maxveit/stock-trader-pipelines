@@ -30,73 +30,49 @@ spec:
     - name: tlsverify
       description: Enable TLS verification
       default: "false"
-    - name: imageUrl
-      description: The destination tag to store the image
-    - name: context
-      description: Path within the workspace to find the Dockerfile
-    - name: sourceDir
+    - name: appDir
       description: defines the directory where the source can be found
-      type: string
-    - name: extraArgs
-      description: Additional arguments to pass to the Kaniko executor
-      default: ""
+    - name: envDir
+      description: defines the directory where the source can be found
+    - name: paramSh
+      description: The param sh file sourcing all other param files
+    - name: builderImage
+      default: quay.io/buildah/stable:v1.15.1
   steps:
   - name: debug
     image: alpine:latest
     script: |
-        ls -la $(inputs.params.sourceDir)/$(inputs.params.context)
-        cd $(inputs.params.sourceDir)/$(inputs.params.context)
+        ls -la $(inputs.params.appDir)/$(inputs.params.context)
+        cd $(inputs.params.appDir)/$(inputs.params.context)
         cat $(inputs.params.dockerfile)
-        echo "Extra args: $(inputs.params.extraArgs)"
-#  - name: container-build-push
-#    workingdir: "$(inputs.params.sourceDir)/"
-#    image: gcr.io/kaniko-project/executor:latest
-#    env:
-#    - name: DOCKER_CONFIG
-#      value: /tekton/home/.docker
-#    command:
-#    - /kaniko/executor
-#    - $(inputs.params.extraArgs)
-#    - --skip-tls-verify
-#    - --dockerfile=$(inputs.params.dockerfile)
-#    - --context=$(inputs.params.sourceDir)/$(inputs.params.context)
-#    - --destination=$(inputs.params.imageUrl)
-#    securityContext:
-#      runAsUser: 0
   - name: build
-    command:
-      - buildah
-      - bud
-      - '--tls-verify=$(inputs.params.tlsverify)'
-      - '--layers'
-      - '--storage-driver=vfs'
-      - '-f'
-      - $(inputs.params.dockerfile)
-      - '-t'
-      - $(inputs.params.imageUrl)
-      - .
-    image: registry.redhat.io/rhel8/buildah
-    resources: {}
+    image: $(params.builderImage)
+    workingDir: $(inputs.params.appDir)
+    script: |
+      source "$(inputs.params.paramSh)"
+      buildah --storage-driver=overlay bud \
+        "$container_build_args" --format=oci \
+        --tls-verify=$(params.tlsverify) --no-cache \
+        -f $(params.dockerfile) -t "$container_path" $(inputs.params.context)
+    volumeMounts:
+    - name: varlibcontainers
+      mountPath: /var/lib/containers
     securityContext:
       privileged: true
-    workingDir: "$(inputs.params.sourceDir)/"
-    volumeMounts:
-      - mountPath: /var/lib/containers
-        name: varlibcontainers
   - name: push
-    command:
-      - buildah
-      - push
-      - '--storage-driver=vfs'
-      - '--tls-verify=$(inputs.params.tlsverify)'
-      - $(inputs.params.imageUrl)
-    image: registry.redhat.io/rhel8/buildah
-    resources: {}
+    image: $(params.builderImage)
+    workingDir: $(inputs.params.appDir)
+    script: |
+      source "$(inputs.params.paramSh)"
+      buildah --storage-driver=overlay push \
+        "$container_push_args" --tls-verify=$(params.tlsverify) \
+        --digestfile $(workspaces.source.path)/image-digest "$container_path" \
+        docker://"$container_path"
+    volumeMounts:
+    - name: varlibcontainers
+      mountPath: /var/lib/containers
     securityContext:
       privileged: true
-    volumeMounts:
-      - mountPath: /var/lib/containers
-        name: varlibcontainers
   volumes:
     - emptyDir: {}
       name: varlibcontainers

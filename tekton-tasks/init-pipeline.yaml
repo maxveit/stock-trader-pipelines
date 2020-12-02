@@ -24,53 +24,55 @@ spec:
     - name: uid
       type: string
       description: Unique build Uid
-    - name: url
+    - name: appUrl
       description: git url to clone
       type: string
-    - name: revision
+    - name: appRevision
+      description: git revision to checkout (branch, tag, sha, ref…)
+      type: string
+      default: master
+    - name: envUrl
+      description: git url to clone
+      type: string
+    - name: envRevision
       description: git revision to checkout (branch, tag, sha, ref…)
       type: string
       default: master
     - name: sslVerify
       description: defines if http.sslVerify should be set to true or false in the global git config
       type: string
-      default: "false"
+      default: "true"
+    - name: env
+      description: Name of the yaml file containing the env variables
+      type: string
   workspaces:
   - name: pipeline
   results:
-  - name: sourceDir
-    description: The directory containing the source code
-  - name: artefactDir
-    description: The directory containing the build artefacts
-  - name: imageUrl
-    description: The output image url
-  - name: commit
+  - name: env_commit
     description: The checked out commit hash
-  - name: services
-    description: service.yaml file path containing the to be provisioned services
+  - name: app_commit
+    description: The checked out commit hash
+  - name: paramSh
+    description: The sh file to source all parameters
   steps:
   - name: create-directories
     image: alpine:latest
     script: |
       mkdir "$(workspaces.pipeline.path)/$(inputs.params.uid)"
-      mkdir "$(workspaces.pipeline.path)/$(inputs.params.uid)/source"
-      mkdir "$(workspaces.pipeline.path)/$(inputs.params.uid)/artefacts"
-      echo -n "$(workspaces.pipeline.path)/$(inputs.params.uid)/source" > /tekton/results/sourceDir
-      echo -n "$(workspaces.pipeline.path)/$(inputs.params.uid)/artefacts" > /tekton/results/artefactDir
+      mkdir "$(workspaces.pipeline.path)/$(inputs.params.uid)/app"
+      mkdir "$(workspaces.pipeline.path)/$(inputs.params.uid)/env"
       ls -la "$(workspaces.pipeline.path)/"
       ls -la "$(workspaces.pipeline.path)/$(inputs.params.uid)/"
     securityContext:
       runAsUser: 0
-  - name: clone
+  - name: clone-params
     image: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:latest
     script: |
-      cp /usr/ssh/id_rsa ~/.ssh
-      cat /usr/ssh/known_hosts >> ~/.ssh/known_hosts
-      CHECKOUT_DIR="$(workspaces.pipeline.path)/$(inputs.params.uid)/source"
+      CHECKOUT_DIR="$(workspaces.pipeline.path)/$(inputs.params.uid)/env"
 
       /ko-app/git-init \
-        -url "$(inputs.params.url)" \
-        -revision "$(inputs.params.revision)" \
+        -url "$(inputs.params.envUrl)" \
+        -revision "$(inputs.params.envRevision)" \
         -path "$CHECKOUT_DIR" \
         -sslVerify "$(inputs.params.sslVerify)"
       cd "$CHECKOUT_DIR"
@@ -83,23 +85,48 @@ spec:
 
       ls -la $CHECKOUT_DIR
       # Make sure we don't add a trailing newline to the result!
-      echo -n "$RESULT_SHA" > /tekton/results/commit
-    volumeMounts:
-      - name: ssh-keys
-        mountPath: /usr/ssh
-        readOnly: true
+      echo -n "$RESULT_SHA" > /tekton/results/env_commit
+    securityContext:
+      runAsUser: 0
+  - name: clone-app
+    image: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:latest
+    script: |
+      CHECKOUT_DIR="$(workspaces.pipeline.path)/$(inputs.params.uid)/app"
+
+      /ko-app/git-init \
+        -url "$(inputs.params.appUrl)" \
+        -revision "$(inputs.params.appRevision)" \
+        -path "$CHECKOUT_DIR" \
+        -sslVerify "$(inputs.params.sslVerify)"
+      cd "$CHECKOUT_DIR"
+      RESULT_SHA="$(git rev-parse HEAD | tr -d '\n')"
+      EXIT_CODE="$?"
+      if [ "$EXIT_CODE" != 0 ]
+      then
+        exit $EXIT_CODE
+      fi
+
+      ls -la $CHECKOUT_DIR
+      # Make sure we don't add a trailing newline to the result!
+      echo -n "$RESULT_SHA" > /tekton/results/app_commit
     securityContext:
       runAsUser: 0
   - name: extract-parameters
     image: alpine:latest
     script: |
-      cat "$(workspaces.pipeline.path)/$(inputs.params.uid)/source/imageurl"
-      cat "$(workspaces.pipeline.path)/$(inputs.params.uid)/source/imageurl" > /tekton/results/imageUrl
-      echo -n "$(workspaces.pipeline.path)/$(inputs.params.uid)/source/services.yaml" > /tekton/results/services
+      ls -la "$(workspaces.pipeline.path)/$(inputs.params.uid)/"
+      ls -la "$(workspaces.pipeline.path)/$(inputs.params.uid)/app/"
+      ls -la "$(workspaces.pipeline.path)/$(inputs.params.uid)/env/"
+
+      cat "$(workspaces.pipeline.path)/$(inputs.params.uid)/app/build_parameters.sh"
+      cat "$(workspaces.pipeline.path)/$(inputs.params.uid)/env/$(inputs.params.env)"
+
+      echo "#!/bin/bash" > "$(workspaces.pipeline.path)/$(inputs.params.uid)/parms.sh"
+      echo "source $(workspaces.pipeline.path)/$(inputs.params.uid)/app/build_parameters.sh" > "$(workspaces.pipeline.path)/$(inputs.params.uid)/parms.sh"
+      echo "source $(workspaces.pipeline.path)/$(inputs.params.uid)/env/$(inputs.params.env)" > "$(workspaces.pipeline.path)/$(inputs.params.uid)/parms.sh"
+      source "$(workspaces.pipeline.path)/$(inputs.params.uid)/parms.sh"
+      echo "container_path=$env_container_registry/$image_namespace/$image_name:$image_tag"
+
+      echo -n "$(workspaces.pipeline.path)/$(inputs.params.uid)/parms.sh" > /tekton/results/paramSh
     securityContext:
       runAsUser: 0
-  volumes:
-    - name: ssh-keys
-      secret:
-        secretName: ssh-key-git-icd-sidecar
-        defaultMode: 400
