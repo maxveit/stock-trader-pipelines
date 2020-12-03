@@ -45,6 +45,8 @@ spec:
     - name: env
       description: Name of the yaml file containing the env variables
       type: string
+    - name: cicdBaseImage
+      description: Default image to use for CICD tasks
   workspaces:
   - name: pipeline
   results:

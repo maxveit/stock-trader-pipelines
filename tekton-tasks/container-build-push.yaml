@@ -38,15 +38,17 @@ spec:
       description: The param sh file sourcing all other param files
     - name: builderImage
       default: quay.io/buildah/stable:v1.15.1
+    - name: cicdBaseImage
+      description: Default image to use for CICD tasks
   steps:
   - name: debug
-    image: alpine:latest
+    image: $(params.cicdBaseImage)
     script: |
         ls -la $(inputs.params.appDir)/$(inputs.params.context)
         cd $(inputs.params.appDir)/$(inputs.params.context)
         cat $(inputs.params.dockerfile)
   - name: build
-    image: $(params.builderImage)
+    image: $(params.cicdBaseImage)
     workingDir: $(inputs.params.appDir)
     script: |
       source "$(inputs.params.paramSh)"
@@ -71,7 +73,7 @@ spec:
           secretKeyRef:
             name: cr-creds
             key: pass
-    image: $(params.builderImage)
+    image: $(params.cicdBaseImage)
     workingDir: $(inputs.params.appDir)
     script: |
       source "$(inputs.params.paramSh)"

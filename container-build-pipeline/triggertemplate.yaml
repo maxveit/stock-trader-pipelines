@@ -30,6 +30,12 @@ spec:
         value: $(params.gitRevision)
       - name: gitUrl
         value: $(params.gitUrl)
+      - name: envUrl
+        value: https://github.com/maxveit/tekton-config.git
+      - name: envRevision
+        value: HEAD
+      - name: cicdBaseImage
+        value: quay-quay-quay.mycluster-us-sout-363772-a01ee4194ed985a1e32b1d96fd4ae346-0000.us-south.containers.appdomain.cloud/cicd/cicd-base:latest
       workspaces:
       - name: pipeline-workspace
         volumeClaimTemplate:

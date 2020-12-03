@@ -27,13 +27,16 @@ spec:
       description: The env params directory
     - name: paramSh
       description: Path to the parameter shell script
+    - name: cicdBaseImage
+      description: Default image to use for CICD tasks
   workspaces:
   - name: pipeline
     description: The git repo will be cloned onto the volume backing this workspace
   steps:
   - name: maven-build
-    image: maven:3.6-jdk-11-slim
+    image: $(params.cicdBaseImage)
     script: |
+        #!/bin/bash
         source $(inputs.params.paramSh)
 
         ls -la $(inputs.params.appDir);

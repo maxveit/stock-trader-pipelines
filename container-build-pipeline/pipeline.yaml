@@ -21,6 +21,9 @@ spec:
   - name: buildUid
   - name: gitRevision
   - name: gitUrl
+  - name: envUrl
+  - name: envRevision
+  - name: cicdBaseImage
   workspaces:
   - name: pipeline-workspace
   tasks:
@@ -35,11 +38,13 @@ spec:
     - name: appRevision
       value: $(params.gitRevision)
     - name: envUrl
-      value: https://github.com/maxveit/tekton-config.git
+      value: $(params.envUrl)
     - name: envRevision
-      value: HEAD
+      value: $(params.envRevision)
     - name: env
       value: "dev.sh"
+    - name: cicdBaseImage
+      value: $(params.cicdBaseImage)
     workspaces:
     - name: pipeline
       workspace: pipeline-workspace
@@ -58,6 +63,8 @@ spec:
         value: $(tasks.init.results.envDir)
       - name: paramSh
         value: $(tasks.init.results.paramSh)
+      - name: cicdBaseImage
+        value: $(params.cicdBaseImage)
  # - name: provision-services
  #   runAfter:
  #     - container-build
