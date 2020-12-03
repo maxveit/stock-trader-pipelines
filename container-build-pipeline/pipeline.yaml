@@ -35,11 +35,11 @@ spec:
     - name: appRevision
       value: $(params.gitRevision)
     - name: envUrl
-      value: git@github.com:maxveit/tekton-config.git
+      value: https://github.com/maxveit/tekton-config.git
     - name: envRevision
-      value: master
+      value: HEAD
     - name: env
-      value: "dev.yaml"
+      value: "dev.sh"
     workspaces:
     - name: pipeline
       workspace: pipeline-workspace

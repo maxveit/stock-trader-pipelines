@@ -30,10 +30,16 @@ spec:
     params:
     - name: uid
       value: $(params.buildUid)
-    - name: url
+    - name: appUrl
       value: $(params.gitUrl)
-    - name: revision
+    - name: appRevision
       value: $(params.gitRevision)
+    - name: envUrl
+      value: https://github.com/maxveit/tekton-config.git
+    - name: envRevision
+      value: HEAD
+    - name: env
+      value: "dev.sh"
     workspaces:
     - name: pipeline
       workspace: pipeline-workspace
@@ -46,14 +52,10 @@ spec:
     - name: pipeline
       workspace: pipeline-workspace
     params:
-      - name: sourceDir
-        value: $(tasks.init.results.sourceDir)
-      - name: artefactDir
-        value: $(tasks.init.results.artefactDir)
-      - name: goals
-        value: "package"
-      - name: copyResults
-        value: "true"
+      - name: appDir
+        value: $(tasks.init.results.appDir)
+      - name: paramSh
+        value: $(tasks.init.results.paramSh)
   - name: container-build
     runAfter:
       - maven-build
@@ -63,12 +65,12 @@ spec:
     - name: pipeline
       workspace: pipeline-workspace
     params:
-      - name: sourceDir
-        value: $(tasks.init.results.sourceDir)
-      - name: context
-        value: "/"
-      - name: imageUrl
-        value: $(tasks.init.results.imageUrl)
+      - name: appDir
+        value: $(tasks.init.results.appDir)
+      - name: envDir
+        value: $(tasks.init.results.envDir)
+      - name: paramSh
+        value: $(tasks.init.results.paramSh)
   - name: provision-services
     runAfter:
       - container-build

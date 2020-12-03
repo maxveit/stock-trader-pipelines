@@ -51,7 +51,7 @@ spec:
     script: |
       source "$(inputs.params.paramSh)"
       buildah --storage-driver=overlay bud \
-        "$container_build_args" --format=oci \
+        --format=oci \
         --tls-verify=$(params.tlsverify) --no-cache \
         -f $(params.dockerfile) -t "$container_path" $(inputs.params.context)
     volumeMounts:
@@ -60,12 +60,24 @@ spec:
     securityContext:
       privileged: true
   - name: push
+    env:
+      - name: CR_USER
+        valueFrom:
+          secretKeyRef:
+            name: cr-creds
+            key: user
+      - name: CR_PASS
+        valueFrom:
+          secretKeyRef:
+            name: cr-creds
+            key: pass
     image: $(params.builderImage)
     workingDir: $(inputs.params.appDir)
     script: |
       source "$(inputs.params.paramSh)"
       buildah --storage-driver=overlay push \
-        "$container_push_args" --tls-verify=$(params.tlsverify) \
+        --tls-verify=$(params.tlsverify) \
+        --creds="$CR_USER:$CR_PASS" \
         --digestfile $(workspaces.source.path)/image-digest "$container_path" \
         docker://"$container_path"
     volumeMounts:

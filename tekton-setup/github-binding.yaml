@@ -7,6 +7,6 @@ spec:
   - name: gitRevision
     value: $(body.head_commit.id)
   - name: gitUrl
-    value: $(body.repository.ssh_url)
+    value: $(body.repository.url)
   - name: gitRepoName
     value: $(body.repository.name)

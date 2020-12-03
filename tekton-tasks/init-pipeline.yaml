@@ -41,7 +41,7 @@ spec:
     - name: sslVerify
       description: defines if http.sslVerify should be set to true or false in the global git config
       type: string
-      default: "true"
+      default: "false"
     - name: env
       description: Name of the yaml file containing the env variables
       type: string
@@ -54,6 +54,8 @@ spec:
     description: The checked out commit hash
   - name: paramSh
     description: The sh file to source all parameters
+  - name: appDir
+  - name: envDir
   steps:
   - name: create-directories
     image: alpine:latest
@@ -63,29 +65,6 @@ spec:
       mkdir "$(workspaces.pipeline.path)/$(inputs.params.uid)/env"
       ls -la "$(workspaces.pipeline.path)/"
       ls -la "$(workspaces.pipeline.path)/$(inputs.params.uid)/"
-    securityContext:
-      runAsUser: 0
-  - name: clone-params
-    image: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:latest
-    script: |
-      CHECKOUT_DIR="$(workspaces.pipeline.path)/$(inputs.params.uid)/env"
-
-      /ko-app/git-init \
-        -url "$(inputs.params.envUrl)" \
-        -revision "$(inputs.params.envRevision)" \
-        -path "$CHECKOUT_DIR" \
-        -sslVerify "$(inputs.params.sslVerify)"
-      cd "$CHECKOUT_DIR"
-      RESULT_SHA="$(git rev-parse HEAD | tr -d '\n')"
-      EXIT_CODE="$?"
-      if [ "$EXIT_CODE" != 0 ]
-      then
-        exit $EXIT_CODE
-      fi
-
-      ls -la $CHECKOUT_DIR
-      # Make sure we don't add a trailing newline to the result!
-      echo -n "$RESULT_SHA" > /tekton/results/env_commit
     securityContext:
       runAsUser: 0
   - name: clone-app
@@ -111,6 +90,29 @@ spec:
       echo -n "$RESULT_SHA" > /tekton/results/app_commit
     securityContext:
       runAsUser: 0
+  - name: clone-params
+    image: gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:latest
+    script: |
+      CHECKOUT_DIR="$(workspaces.pipeline.path)/$(inputs.params.uid)/env"
+
+      /ko-app/git-init \
+        -url "$(inputs.params.envUrl)" \
+        -revision "$(inputs.params.envRevision)" \
+        -path "$CHECKOUT_DIR" \
+        -sslVerify "$(inputs.params.sslVerify)"
+      cd "$CHECKOUT_DIR"
+      RESULT_SHA="$(git rev-parse HEAD | tr -d '\n')"
+      EXIT_CODE="$?"
+      if [ "$EXIT_CODE" != 0 ]
+      then
+        exit $EXIT_CODE
+      fi
+
+      ls -la $CHECKOUT_DIR
+      # Make sure we don't add a trailing newline to the result!
+      echo -n "$RESULT_SHA" > /tekton/results/env_commit
+    securityContext:
+      runAsUser: 0
   - name: extract-parameters
     image: alpine:latest
     script: |
@@ -118,14 +120,18 @@ spec:
       ls -la "$(workspaces.pipeline.path)/$(inputs.params.uid)/app/"
       ls -la "$(workspaces.pipeline.path)/$(inputs.params.uid)/env/"
 
+      echo -n "$(workspaces.pipeline.path)/$(inputs.params.uid)/app/" > /tekton/results/appDir
+      echo -n "$(workspaces.pipeline.path)/$(inputs.params.uid)/env/" > /tekton/results/envDir
+
       cat "$(workspaces.pipeline.path)/$(inputs.params.uid)/app/build_parameters.sh"
       cat "$(workspaces.pipeline.path)/$(inputs.params.uid)/env/$(inputs.params.env)"
 
       echo "#!/bin/bash" > "$(workspaces.pipeline.path)/$(inputs.params.uid)/parms.sh"
-      echo "source $(workspaces.pipeline.path)/$(inputs.params.uid)/app/build_parameters.sh" > "$(workspaces.pipeline.path)/$(inputs.params.uid)/parms.sh"
-      echo "source $(workspaces.pipeline.path)/$(inputs.params.uid)/env/$(inputs.params.env)" > "$(workspaces.pipeline.path)/$(inputs.params.uid)/parms.sh"
+      echo "source $(workspaces.pipeline.path)/$(inputs.params.uid)/app/build_parameters.sh" >> "$(workspaces.pipeline.path)/$(inputs.params.uid)/parms.sh"
+      echo "source $(workspaces.pipeline.path)/$(inputs.params.uid)/env/$(inputs.params.env)" >> "$(workspaces.pipeline.path)/$(inputs.params.uid)/parms.sh"
+
       source "$(workspaces.pipeline.path)/$(inputs.params.uid)/parms.sh"
-      echo "container_path=$env_container_registry/$image_namespace/$image_name:$image_tag"
+      echo "container_path=$env_container_registry/$image_namespace/$image_name:$image_tag" >> "$(workspaces.pipeline.path)/$(inputs.params.uid)/parms.sh"
 
       echo -n "$(workspaces.pipeline.path)/$(inputs.params.uid)/parms.sh" > /tekton/results/paramSh
     securityContext:
