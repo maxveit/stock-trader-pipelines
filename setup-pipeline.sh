@@ -19,6 +19,10 @@ oc create sa service-deploy # This must be kept
 oc apply -f tekton-setup/service-provision-role.yaml
 oc apply -f tekton-setup/service-provision-rolebinding.yaml 
 
+###### Create secret for webhook-trigger
+WEBHOOKKEY=$(openssl rand -base64 20)
+oc create secret generic tekton-webhook --from-literal=key=$WEBHOOKKEY
+
 ###### Tekton pipeline prep
 oc apply -f tekton-setup/github-binding.yaml
 oc apply -f tekton-setup/trigger-role.yaml
@@ -49,3 +53,9 @@ oc apply -f gradle-build-pipeline/triggertemplate.yaml
 oc create route edge el-github-listener-container-build --service=el-github-listener-container-build
 oc create route edge el-github-listener-gradle-build --service=el-github-listener-gradle-build
 oc create route edge el-github-listener-maven-build --service=el-github-listener-maven-build
+
+###### Output and delete webhook-key
+
+echo "Key for your webhook-trigger (copy to git):"
+echo $WEBHOOKKEY
+unset WEBHOOKKEY
