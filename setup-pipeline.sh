@@ -19,6 +19,13 @@ oc create sa service-deploy # This must be kept
 oc apply -f tekton-setup/service-provision-role.yaml
 oc apply -f tekton-setup/service-provision-rolebinding.yaml 
 
+# Create secret for webhook-trigger
+WEBHOOKKEY=$(openssl rand -base64 20)
+oc create secret generic webhook-trigger-key --from-literal=key=$WEBHOOKKEY
+echo "Key for your webhook-trigger (copy to git):"
+echo $WEBHOOKKEY
+unset WEBHOOKKEY
+
 ###### Tekton pipeline prep
 oc apply -f secret.yaml
 oc apply -f tekton-setup/github-binding.yaml
