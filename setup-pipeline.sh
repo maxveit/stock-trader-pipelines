@@ -27,7 +27,6 @@ echo $WEBHOOKKEY
 unset WEBHOOKKEY
 
 ###### Tekton pipeline prep
-oc apply -f secret.yaml
 oc apply -f tekton-setup/github-binding.yaml
 oc apply -f tekton-setup/trigger-role.yaml
 oc apply -f tekton-setup/trigger-rolebinding.yaml

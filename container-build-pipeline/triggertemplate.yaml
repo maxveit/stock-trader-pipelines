@@ -10,8 +10,6 @@ spec:
     description: The git repository url
   - name: gitRepoName
     description: The git repo name
-  #- name: gitBranchName
-  #  description: The git branch name
   resourcetemplates:
   - apiVersion: tekton.dev/v1beta1
     kind: PipelineRun

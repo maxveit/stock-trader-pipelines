@@ -8,11 +8,13 @@ spec:
     description: The git revision
   - name: gitUrl
     description: The git repository url
+  - name: gitRepoName
+    description: The git repo name
   resourcetemplates:
   - apiVersion: tekton.dev/v1alpha1
     kind: PipelineRun
     metadata:
-      generateName: maven-build-pipelinerun-
+      name: maven-$(params.gitRepoName)-$(uid)
     spec:
       pipelineRef:
         name: maven-build

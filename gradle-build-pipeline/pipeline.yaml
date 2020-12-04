@@ -21,6 +21,9 @@ spec:
   - name: buildUid
   - name: gitRevision
   - name: gitUrl
+  - name: envUrl
+  - name: envRevision
+  - name: cicdBaseImage
   workspaces:
   - name: pipeline-workspace
   tasks:
@@ -30,10 +33,18 @@ spec:
     params:
     - name: uid
       value: $(params.buildUid)
-    - name: url
+    - name: appUrl
       value: $(params.gitUrl)
-    - name: revision
+    - name: appRevision
       value: $(params.gitRevision)
+    - name: envUrl
+      value: $(params.envUrl)
+    - name: envRevision
+      value: $(params.envRevision)
+    - name: env
+      value: "dev.sh"
+    - name: cicdBaseImage
+      value: $(params.cicdBaseImage)
     workspaces:
     - name: pipeline
       workspace: pipeline-workspace
@@ -46,8 +57,14 @@ spec:
     - name: pipeline
       workspace: pipeline-workspace
     params:
-      - name: sourceDir
-        value: $(tasks.init.results.sourceDir)
+      - name: appDir
+        value: $(tasks.init.results.appDir)
+      - name: envDir
+        value: $(tasks.init.results.envDir)
+      - name: paramSh
+        value: $(tasks.init.results.paramSh)
+      - name: cicdBaseImage
+        value: $(params.cicdBaseImage)
   - name: container-build
     runAfter:
       - gradle-build
@@ -57,20 +74,22 @@ spec:
     - name: pipeline
       workspace: pipeline-workspace
     params:
-      - name: sourceDir
-        value: $(tasks.init.results.sourceDir)
-      - name: context
-        value: "/"
-      - name: imageUrl
-        value: $(tasks.init.results.imageUrl)
-  - name: provision-services
-    runAfter:
-      - container-build
-    taskRef:
-      name: provision-services
-    workspaces:
-    - name: pipeline
-      workspace: pipeline-workspace
-    params:
-      - name: file
-        value: $(tasks.init.results.services)
+      - name: appDir
+        value: $(tasks.init.results.appDir)
+      - name: envDir
+        value: $(tasks.init.results.envDir)
+      - name: paramSh
+        value: $(tasks.init.results.paramSh)
+      - name: cicdBaseImage
+        value: $(params.cicdBaseImage)
+#  - name: provision-services
+#    runAfter:
+#      - container-build
+#    taskRef:
+#      name: provision-services
+#    workspaces:
+#    - name: pipeline
+#      workspace: pipeline-workspace
+#    params:
+#      - name: file
+#        value: $(tasks.init.results.services)
