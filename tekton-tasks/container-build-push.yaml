@@ -48,9 +48,11 @@ spec:
         cd $(inputs.params.appDir)/$(inputs.params.context)
         cat $(inputs.params.dockerfile)
   - name: build
-    image: $(params.cicdBaseImage)
+    image: quay.io/buildah/stable
     workingDir: $(inputs.params.appDir)
     script: |
+      #!/bin/bash
+      set -ex
       source "$(inputs.params.paramSh)"
       buildah --storage-driver=overlay bud \
         --format=oci \
@@ -73,14 +75,16 @@ spec:
           secretKeyRef:
             name: cr-creds
             key: pass
-    image: $(params.cicdBaseImage)
+    image: quay.io/buildah/stable
     workingDir: $(inputs.params.appDir)
     script: |
+      #!/bin/bash
+      set -ex
       source "$(inputs.params.paramSh)"
       buildah --storage-driver=overlay push \
         --tls-verify=$(params.tlsverify) \
         --creds="$CR_USER:$CR_PASS" \
-        --digestfile $(workspaces.source.path)/image-digest "$container_path" \
+        --digestfile $(workspaces.pipeline.path)/image-digest "$container_path" \
         docker://"$container_path"
     volumeMounts:
     - name: varlibcontainers

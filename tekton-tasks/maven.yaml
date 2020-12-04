@@ -18,9 +18,6 @@ metadata:
   name: maven
 spec:
   params:
-    - name: goals
-      description: The Maven goals to run
-      default: "package"
     - name: appDir
       description: The source directory
     - name: envDir

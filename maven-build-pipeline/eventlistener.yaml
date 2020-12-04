@@ -8,9 +8,9 @@ spec:
     - name: gh-trigger
       interceptors:
         - github:
-            #secretRef:
-            #  secretName: foo
-            #  secretKey: bar
+            secretRef:
+              secretName: tekton-webhook
+              secretKey: key
             eventTypes:
               - push
               - ping

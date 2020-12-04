@@ -12,29 +12,32 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-apiVersion: tekton.dev/v1alpha1
+apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
   name: gradle
 spec:
   inputs:
     params:
-    - name: goals
-      description: The Gradle goals to run
-      default: "quarkusBuild"
-    - name: sourceDir
+    - name: appDir
       description: The source directory
-      default: ""
+    - name: envDir
+      description: The env params directory
+    - name: paramSh
+      description: Path to the parameter shell script
+    - name: cicdBaseImage
+      description: Default image to use for CICD tasks
   workspaces:
   - name: pipeline
     description: The git repo will be cloned onto the volume backing this workspace
   steps:
   - name: gradle-build
-    image: adoptopenjdk:11-jdk-openj9
+    image: $(params.cicdBaseImage)
     script: |
-        ls -la $(inputs.params.sourceDir);
-        cd $(inputs.params.sourceDir)
-        ./gradlew $(inputs.params.goals)
+        source $(params.paramSh)
+        ls -la $(params.appDir);
+        cd $(params.appDir)
+        ./gradlew $(params.goals)
     volumeMounts:
       - name: m2-repository
         mountPath: /.m2

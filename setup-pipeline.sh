@@ -20,7 +20,6 @@ oc apply -f tekton-setup/service-provision-role.yaml
 oc apply -f tekton-setup/service-provision-rolebinding.yaml 
 
 ###### Tekton pipeline prep
-oc apply -f secret.yaml
 oc apply -f tekton-setup/github-binding.yaml
 oc apply -f tekton-setup/trigger-role.yaml
 oc apply -f tekton-setup/trigger-rolebinding.yaml

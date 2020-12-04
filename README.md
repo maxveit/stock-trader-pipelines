@@ -6,18 +6,16 @@ All of the pipelines here only work properly with GitHub webhooks. This is due t
 A single PVC should be used, to store all build artefacts. There is currently no cleanup mechanism built in, to be able to more easily debug failed builds. It can be easily added usign the cleanup-folder.yaml task if needed.
 
 ## Service Accounts
-* Create a service account `cr-creds` which has two fields, `user` and `pass` containing user and password with permission to push to your docker registry (needed for `container-build-push.yaml`-Task)
+* Create a Secret `cr-creds` which has two fields, `user` and `pass` containing user and password with permission to push to your docker registry (needed for `container-build-push.yaml`-Task)
 
 ## tekton-setup
 This folder contains Roles and RoleBindings to grant needed permissions to the default ServiceAccount which is used for Tekton. In a production setup you would likely use a separate ServiceAccount. Further a GitHub Binding is included which translates from the json GitHub Webhooks are sending to Tekton Parameters. This can be ignored if a non-GitHub git repo is used.
 * Fork the repo https://github.com/maxveit/tekton-config and adjust for your needs
-* Fork the repo https://github.com/maxveit/tekton-kubectl and adjust for your needs (you need access to the resulting container image for some pipelines)
-* 
+* Fork the repo https://github.com/maxveit/cicd-base and adjust for your needs (you need access to the resulting container image for some pipelines)
 
 ## tekton-tasks
 A collection of tekton tasks I have maintained over time.
 * init-pipeline.yaml - Create folders in the workspace attached, including the unique $(uid) of this build and check out the git repo to that
-* cleanup-folder.yaml - rm -rf a specific folder
 * container-build-push.yaml - Build and push a container using buildah (was kaniko before, but there is an issue with microdnf in UBI images)
 * gradle.yaml - Build a gradle application
 * maven.yaml - Build a maven application
